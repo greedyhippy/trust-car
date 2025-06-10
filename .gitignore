@@ -1,0 +1,83 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Testing
+coverage/
+*.coverage
+.coverage
+
+# Production builds
+dist/
+build/
+*.tsbuildinfo
+
+# Algorand / AlgoKit
+.algokit/
+*.cache/
+__pycache__/
+*.pyc
+.test-algokit/
+*.log
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env*.local
+
+# IDE
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Python
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Compiled files
+*.algo.ts.tok
+*.teal
+*.arc32.json
+
+# Temporary files
+*.tmp
+*.temp
+.tmp/
+
+# Contract artifacts (if you want to exclude them)
+# artifacts/
+
+# Local blockchain data
+sandbox/
