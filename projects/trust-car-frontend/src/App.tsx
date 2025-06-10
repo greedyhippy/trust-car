@@ -2,6 +2,7 @@ import { SupportedWallet, WalletId, WalletManager, WalletProvider } from '@txnla
 import { SnackbarProvider } from 'notistack'
 import Home from './Home'
 import { getAlgodConfigFromViteEnvironment, getKmdConfigFromViteEnvironment } from './utils/network/getAlgoClientConfigs'
+import { VehicleSearch } from './components/VehicleSearch'
 
 let supportedWallets: SupportedWallet[]
 if (import.meta.env.VITE_ALGOD_NETWORK === 'localnet') {
@@ -49,7 +50,10 @@ export default function App() {
   return (
     <SnackbarProvider maxSnack={3}>
       <WalletProvider manager={walletManager}>
-        <Home />
+        <div>
+          <VehicleSearch />
+          <Home />
+        </div>
       </WalletProvider>
     </SnackbarProvider>
   )
