@@ -1,0 +1,965 @@
+{
+  "version": 3,
+  "sources": [
+    "E:/Software Dev/Blockchain/TrustCarProject/trust-car/projects/trust-car-contracts/smart_contracts/irish_vehicle_registry/contract.algo.ts"
+  ],
+  "mappings": ";;;;;;;;;;;AAGA;;AAAA;;;AAAA;;;;;;;;;;;;;;;;;;;;;;AAAA;;;AAAA;;;;;;;;;;AAAA;;;AAiBE;;AAAA;AAAA;AAAA;;AAAA;AAAA;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;AAAA;AAAA;;AALA;;AAAA;AAAA;AAAA;;AAAA;AAZF;;;AAAA;;;AAAA;;;AAAA;;;AAYE;;;AAAA;AAAA;AAAA;AAAA;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;;AALA;;AAAA;AAAA;AAAA;;AAAA;AAPF;;;AAAA;;;AAAA;;;AAAA;;;AAOE;;;AAAA;AAAA;AAAA;AAAA;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;;AALA;;AAAA;AAAA;AAAA;;AAAA;AAFF;;;AAAA;;;AAEE;;;AAAA;AAAA;AAAA;AAAA;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;;AAFF;;AAAA;;;AAAA;;AAAA;AAAA;AAAA;;AAEE;;;AACS;;;;;;;;;;AAAA;;AAAA;AAAA;;;;;;;;;;;;;AAAA;AAAP;AAIF;;;AACS;;AAAA;;;;;;;;;;;;;;;;;;AAAA;AAAA;;AAAA;AAAP;AAIF;;;AACS;;;;;;;;;;AAAA;;AAAA;AAAA;;;;;;;;;;;;;;;;AAAA;AAAA;;AAAA;AAAP",
+  "op_pc_offset": 0,
+  "pc_events": {
+    "1": {
+      "subroutine": "@algorandfoundation/algorand-typescript/arc4/index.d.ts::Contract.approvalProgram",
+      "params": {},
+      "block": "main",
+      "stack_in": [],
+      "op": "intcblock 1"
+    },
+    "4": {
+      "op": "bytecblock 0x151f7c75"
+    },
+    "11": {
+      "op": "txn NumAppArgs",
+      "defined_out": [
+        "tmp%0#1"
+      ],
+      "stack_out": [
+        "tmp%0#1"
+      ]
+    },
+    "13": {
+      "op": "bz main_bare_routing@9",
+      "stack_out": []
+    },
+    "16": {
+      "op": "pushbytess 0x11e029fd 0xd04eb51b 0xc2c55cfb 0x3d0802a3 // method \"registerVehicle(string)string\", method \"transferOwnership(string,string)string\", method \"addServiceRecord(string,string)string\", method \"getInfo()string\"",
+      "defined_out": [
+        "Method(addServiceRecord(string,string)string)",
+        "Method(getInfo()string)",
+        "Method(registerVehicle(string)string)",
+        "Method(transferOwnership(string,string)string)"
+      ],
+      "stack_out": [
+        "Method(registerVehicle(string)string)",
+        "Method(transferOwnership(string,string)string)",
+        "Method(addServiceRecord(string,string)string)",
+        "Method(getInfo()string)"
+      ]
+    },
+    "38": {
+      "op": "txna ApplicationArgs 0",
+      "defined_out": [
+        "Method(addServiceRecord(string,string)string)",
+        "Method(getInfo()string)",
+        "Method(registerVehicle(string)string)",
+        "Method(transferOwnership(string,string)string)",
+        "tmp%2#0"
+      ],
+      "stack_out": [
+        "Method(registerVehicle(string)string)",
+        "Method(transferOwnership(string,string)string)",
+        "Method(addServiceRecord(string,string)string)",
+        "Method(getInfo()string)",
+        "tmp%2#0"
+      ]
+    },
+    "41": {
+      "op": "match main_registerVehicle_route@3 main_transferOwnership_route@4 main_addServiceRecord_route@5 main_getInfo_route@6",
+      "stack_out": []
+    },
+    "51": {
+      "block": "main_after_if_else@13",
+      "stack_in": [],
+      "op": "pushint 0 // 0",
+      "defined_out": [
+        "tmp%0#0"
+      ],
+      "stack_out": [
+        "tmp%0#0"
+      ]
+    },
+    "53": {
+      "op": "return",
+      "stack_out": []
+    },
+    "54": {
+      "block": "main_getInfo_route@6",
+      "stack_in": [],
+      "op": "txn OnCompletion",
+      "defined_out": [
+        "tmp%28#0"
+      ],
+      "stack_out": [
+        "tmp%28#0"
+      ]
+    },
+    "56": {
+      "op": "!",
+      "defined_out": [
+        "tmp%29#0"
+      ],
+      "stack_out": [
+        "tmp%29#0"
+      ]
+    },
+    "57": {
+      "error": "OnCompletion is not NoOp",
+      "op": "assert // OnCompletion is not NoOp",
+      "stack_out": []
+    },
+    "58": {
+      "op": "txn ApplicationID",
+      "defined_out": [
+        "tmp%30#0"
+      ],
+      "stack_out": [
+        "tmp%30#0"
+      ]
+    },
+    "60": {
+      "error": "can only call when not creating",
+      "op": "assert // can only call when not creating",
+      "stack_out": []
+    },
+    "61": {
+      "op": "pushbytes 0x151f7c75001b49726973682056656869636c652052656769737472792076312e30",
+      "defined_out": [
+        "0x151f7c75001b49726973682056656869636c652052656769737472792076312e30"
+      ],
+      "stack_out": [
+        "0x151f7c75001b49726973682056656869636c652052656769737472792076312e30"
+      ]
+    },
+    "96": {
+      "op": "log",
+      "stack_out": []
+    },
+    "97": {
+      "op": "intc_0 // 1",
+      "defined_out": [
+        "tmp%0#0"
+      ],
+      "stack_out": [
+        "tmp%0#0"
+      ]
+    },
+    "98": {
+      "op": "return",
+      "stack_out": []
+    },
+    "99": {
+      "block": "main_addServiceRecord_route@5",
+      "stack_in": [],
+      "op": "txn OnCompletion",
+      "defined_out": [
+        "tmp%19#0"
+      ],
+      "stack_out": [
+        "tmp%19#0"
+      ]
+    },
+    "101": {
+      "op": "!",
+      "defined_out": [
+        "tmp%20#0"
+      ],
+      "stack_out": [
+        "tmp%20#0"
+      ]
+    },
+    "102": {
+      "error": "OnCompletion is not NoOp",
+      "op": "assert // OnCompletion is not NoOp",
+      "stack_out": []
+    },
+    "103": {
+      "op": "txn ApplicationID",
+      "defined_out": [
+        "tmp%21#0"
+      ],
+      "stack_out": [
+        "tmp%21#0"
+      ]
+    },
+    "105": {
+      "error": "can only call when not creating",
+      "op": "assert // can only call when not creating",
+      "stack_out": []
+    },
+    "106": {
+      "op": "txna ApplicationArgs 1",
+      "defined_out": [
+        "tmp%23#0"
+      ],
+      "stack_out": [
+        "tmp%23#0"
+      ]
+    },
+    "109": {
+      "op": "extract 2 0",
+      "defined_out": [
+        "tmp%24#0"
+      ],
+      "stack_out": [
+        "tmp%24#0"
+      ]
+    },
+    "112": {
+      "op": "txna ApplicationArgs 2",
+      "defined_out": [
+        "tmp%24#0",
+        "tmp%25#0"
+      ],
+      "stack_out": [
+        "tmp%24#0",
+        "tmp%25#0"
+      ]
+    },
+    "115": {
+      "op": "extract 2 0",
+      "defined_out": [
+        "tmp%24#0",
+        "tmp%26#0"
+      ],
+      "stack_out": [
+        "tmp%24#0",
+        "tmp%26#0"
+      ]
+    },
+    "118": {
+      "callsub": "smart_contracts/irish_vehicle_registry/contract.algo.ts::IrishVehicleRegistry.addServiceRecord",
+      "op": "callsub addServiceRecord",
+      "defined_out": [
+        "to_encode%2#0"
+      ],
+      "stack_out": [
+        "to_encode%2#0"
+      ]
+    },
+    "121": {
+      "op": "dup",
+      "defined_out": [
+        "to_encode%2#0",
+        "to_encode%2#0 (copy)"
+      ],
+      "stack_out": [
+        "to_encode%2#0",
+        "to_encode%2#0 (copy)"
+      ]
+    },
+    "122": {
+      "op": "len",
+      "defined_out": [
+        "length%2#0",
+        "to_encode%2#0"
+      ],
+      "stack_out": [
+        "to_encode%2#0",
+        "length%2#0"
+      ]
+    },
+    "123": {
+      "op": "itob",
+      "defined_out": [
+        "as_bytes%2#0",
+        "to_encode%2#0"
+      ],
+      "stack_out": [
+        "to_encode%2#0",
+        "as_bytes%2#0"
+      ]
+    },
+    "124": {
+      "op": "extract 6 2",
+      "defined_out": [
+        "length_uint16%2#0",
+        "to_encode%2#0"
+      ],
+      "stack_out": [
+        "to_encode%2#0",
+        "length_uint16%2#0"
+      ]
+    },
+    "127": {
+      "op": "swap",
+      "stack_out": [
+        "length_uint16%2#0",
+        "to_encode%2#0"
+      ]
+    },
+    "128": {
+      "op": "concat",
+      "defined_out": [
+        "encoded_value%2#0"
+      ],
+      "stack_out": [
+        "encoded_value%2#0"
+      ]
+    },
+    "129": {
+      "op": "bytec_0 // 0x151f7c75",
+      "defined_out": [
+        "0x151f7c75",
+        "encoded_value%2#0"
+      ],
+      "stack_out": [
+        "encoded_value%2#0",
+        "0x151f7c75"
+      ]
+    },
+    "130": {
+      "op": "swap",
+      "stack_out": [
+        "0x151f7c75",
+        "encoded_value%2#0"
+      ]
+    },
+    "131": {
+      "op": "concat",
+      "defined_out": [
+        "tmp%27#0"
+      ],
+      "stack_out": [
+        "tmp%27#0"
+      ]
+    },
+    "132": {
+      "op": "log",
+      "stack_out": []
+    },
+    "133": {
+      "op": "intc_0 // 1",
+      "defined_out": [
+        "tmp%0#0"
+      ],
+      "stack_out": [
+        "tmp%0#0"
+      ]
+    },
+    "134": {
+      "op": "return",
+      "stack_out": []
+    },
+    "135": {
+      "block": "main_transferOwnership_route@4",
+      "stack_in": [],
+      "op": "txn OnCompletion",
+      "defined_out": [
+        "tmp%10#0"
+      ],
+      "stack_out": [
+        "tmp%10#0"
+      ]
+    },
+    "137": {
+      "op": "!",
+      "defined_out": [
+        "tmp%11#0"
+      ],
+      "stack_out": [
+        "tmp%11#0"
+      ]
+    },
+    "138": {
+      "error": "OnCompletion is not NoOp",
+      "op": "assert // OnCompletion is not NoOp",
+      "stack_out": []
+    },
+    "139": {
+      "op": "txn ApplicationID",
+      "defined_out": [
+        "tmp%12#0"
+      ],
+      "stack_out": [
+        "tmp%12#0"
+      ]
+    },
+    "141": {
+      "error": "can only call when not creating",
+      "op": "assert // can only call when not creating",
+      "stack_out": []
+    },
+    "142": {
+      "op": "txna ApplicationArgs 1",
+      "defined_out": [
+        "tmp%14#0"
+      ],
+      "stack_out": [
+        "tmp%14#0"
+      ]
+    },
+    "145": {
+      "op": "extract 2 0",
+      "defined_out": [
+        "tmp%15#0"
+      ],
+      "stack_out": [
+        "tmp%15#0"
+      ]
+    },
+    "148": {
+      "op": "txna ApplicationArgs 2",
+      "defined_out": [
+        "tmp%15#0",
+        "tmp%16#0"
+      ],
+      "stack_out": [
+        "tmp%15#0",
+        "tmp%16#0"
+      ]
+    },
+    "151": {
+      "op": "extract 2 0",
+      "defined_out": [
+        "tmp%15#0",
+        "tmp%17#0"
+      ],
+      "stack_out": [
+        "tmp%15#0",
+        "tmp%17#0"
+      ]
+    },
+    "154": {
+      "callsub": "smart_contracts/irish_vehicle_registry/contract.algo.ts::IrishVehicleRegistry.transferOwnership",
+      "op": "callsub transferOwnership",
+      "defined_out": [
+        "to_encode%1#0"
+      ],
+      "stack_out": [
+        "to_encode%1#0"
+      ]
+    },
+    "157": {
+      "op": "dup",
+      "defined_out": [
+        "to_encode%1#0",
+        "to_encode%1#0 (copy)"
+      ],
+      "stack_out": [
+        "to_encode%1#0",
+        "to_encode%1#0 (copy)"
+      ]
+    },
+    "158": {
+      "op": "len",
+      "defined_out": [
+        "length%1#0",
+        "to_encode%1#0"
+      ],
+      "stack_out": [
+        "to_encode%1#0",
+        "length%1#0"
+      ]
+    },
+    "159": {
+      "op": "itob",
+      "defined_out": [
+        "as_bytes%1#0",
+        "to_encode%1#0"
+      ],
+      "stack_out": [
+        "to_encode%1#0",
+        "as_bytes%1#0"
+      ]
+    },
+    "160": {
+      "op": "extract 6 2",
+      "defined_out": [
+        "length_uint16%1#0",
+        "to_encode%1#0"
+      ],
+      "stack_out": [
+        "to_encode%1#0",
+        "length_uint16%1#0"
+      ]
+    },
+    "163": {
+      "op": "swap",
+      "stack_out": [
+        "length_uint16%1#0",
+        "to_encode%1#0"
+      ]
+    },
+    "164": {
+      "op": "concat",
+      "defined_out": [
+        "encoded_value%1#0"
+      ],
+      "stack_out": [
+        "encoded_value%1#0"
+      ]
+    },
+    "165": {
+      "op": "bytec_0 // 0x151f7c75",
+      "defined_out": [
+        "0x151f7c75",
+        "encoded_value%1#0"
+      ],
+      "stack_out": [
+        "encoded_value%1#0",
+        "0x151f7c75"
+      ]
+    },
+    "166": {
+      "op": "swap",
+      "stack_out": [
+        "0x151f7c75",
+        "encoded_value%1#0"
+      ]
+    },
+    "167": {
+      "op": "concat",
+      "defined_out": [
+        "tmp%18#0"
+      ],
+      "stack_out": [
+        "tmp%18#0"
+      ]
+    },
+    "168": {
+      "op": "log",
+      "stack_out": []
+    },
+    "169": {
+      "op": "intc_0 // 1",
+      "defined_out": [
+        "tmp%0#0"
+      ],
+      "stack_out": [
+        "tmp%0#0"
+      ]
+    },
+    "170": {
+      "op": "return",
+      "stack_out": []
+    },
+    "171": {
+      "block": "main_registerVehicle_route@3",
+      "stack_in": [],
+      "op": "txn OnCompletion",
+      "defined_out": [
+        "tmp%3#0"
+      ],
+      "stack_out": [
+        "tmp%3#0"
+      ]
+    },
+    "173": {
+      "op": "!",
+      "defined_out": [
+        "tmp%4#0"
+      ],
+      "stack_out": [
+        "tmp%4#0"
+      ]
+    },
+    "174": {
+      "error": "OnCompletion is not NoOp",
+      "op": "assert // OnCompletion is not NoOp",
+      "stack_out": []
+    },
+    "175": {
+      "op": "txn ApplicationID",
+      "defined_out": [
+        "tmp%5#0"
+      ],
+      "stack_out": [
+        "tmp%5#0"
+      ]
+    },
+    "177": {
+      "error": "can only call when not creating",
+      "op": "assert // can only call when not creating",
+      "stack_out": []
+    },
+    "178": {
+      "op": "txna ApplicationArgs 1",
+      "defined_out": [
+        "tmp%7#0"
+      ],
+      "stack_out": [
+        "tmp%7#0"
+      ]
+    },
+    "181": {
+      "op": "extract 2 0",
+      "defined_out": [
+        "tmp%8#0"
+      ],
+      "stack_out": [
+        "tmp%8#0"
+      ]
+    },
+    "184": {
+      "callsub": "smart_contracts/irish_vehicle_registry/contract.algo.ts::IrishVehicleRegistry.registerVehicle",
+      "op": "callsub registerVehicle",
+      "defined_out": [
+        "to_encode%0#0"
+      ],
+      "stack_out": [
+        "to_encode%0#0"
+      ]
+    },
+    "187": {
+      "op": "dup",
+      "defined_out": [
+        "to_encode%0#0",
+        "to_encode%0#0 (copy)"
+      ],
+      "stack_out": [
+        "to_encode%0#0",
+        "to_encode%0#0 (copy)"
+      ]
+    },
+    "188": {
+      "op": "len",
+      "defined_out": [
+        "length%0#0",
+        "to_encode%0#0"
+      ],
+      "stack_out": [
+        "to_encode%0#0",
+        "length%0#0"
+      ]
+    },
+    "189": {
+      "op": "itob",
+      "defined_out": [
+        "as_bytes%0#0",
+        "to_encode%0#0"
+      ],
+      "stack_out": [
+        "to_encode%0#0",
+        "as_bytes%0#0"
+      ]
+    },
+    "190": {
+      "op": "extract 6 2",
+      "defined_out": [
+        "length_uint16%0#0",
+        "to_encode%0#0"
+      ],
+      "stack_out": [
+        "to_encode%0#0",
+        "length_uint16%0#0"
+      ]
+    },
+    "193": {
+      "op": "swap",
+      "stack_out": [
+        "length_uint16%0#0",
+        "to_encode%0#0"
+      ]
+    },
+    "194": {
+      "op": "concat",
+      "defined_out": [
+        "encoded_value%0#0"
+      ],
+      "stack_out": [
+        "encoded_value%0#0"
+      ]
+    },
+    "195": {
+      "op": "bytec_0 // 0x151f7c75",
+      "defined_out": [
+        "0x151f7c75",
+        "encoded_value%0#0"
+      ],
+      "stack_out": [
+        "encoded_value%0#0",
+        "0x151f7c75"
+      ]
+    },
+    "196": {
+      "op": "swap",
+      "stack_out": [
+        "0x151f7c75",
+        "encoded_value%0#0"
+      ]
+    },
+    "197": {
+      "op": "concat",
+      "defined_out": [
+        "tmp%9#0"
+      ],
+      "stack_out": [
+        "tmp%9#0"
+      ]
+    },
+    "198": {
+      "op": "log",
+      "stack_out": []
+    },
+    "199": {
+      "op": "intc_0 // 1",
+      "defined_out": [
+        "tmp%0#0"
+      ],
+      "stack_out": [
+        "tmp%0#0"
+      ]
+    },
+    "200": {
+      "op": "return",
+      "stack_out": []
+    },
+    "201": {
+      "block": "main_bare_routing@9",
+      "stack_in": [],
+      "op": "txn OnCompletion",
+      "defined_out": [
+        "tmp%33#0"
+      ],
+      "stack_out": [
+        "tmp%33#0"
+      ]
+    },
+    "203": {
+      "op": "bnz main_after_if_else@13",
+      "stack_out": []
+    },
+    "206": {
+      "op": "txn ApplicationID",
+      "defined_out": [
+        "tmp%34#0"
+      ],
+      "stack_out": [
+        "tmp%34#0"
+      ]
+    },
+    "208": {
+      "op": "!",
+      "defined_out": [
+        "tmp%35#0"
+      ],
+      "stack_out": [
+        "tmp%35#0"
+      ]
+    },
+    "209": {
+      "error": "can only call when creating",
+      "op": "assert // can only call when creating",
+      "stack_out": []
+    },
+    "210": {
+      "op": "intc_0 // 1",
+      "defined_out": [
+        "tmp%0#0"
+      ],
+      "stack_out": [
+        "tmp%0#0"
+      ]
+    },
+    "211": {
+      "op": "return",
+      "stack_out": []
+    },
+    "212": {
+      "subroutine": "smart_contracts/irish_vehicle_registry/contract.algo.ts::IrishVehicleRegistry.registerVehicle",
+      "params": {
+        "registration#0": "bytes"
+      },
+      "block": "registerVehicle",
+      "stack_in": [],
+      "op": "proto 1 1"
+    },
+    "215": {
+      "op": "pushbytes \"Vehicle \"",
+      "defined_out": [
+        "\"Vehicle \""
+      ],
+      "stack_out": [
+        "\"Vehicle \""
+      ]
+    },
+    "225": {
+      "op": "frame_dig -1",
+      "defined_out": [
+        "\"Vehicle \"",
+        "registration#0 (copy)"
+      ],
+      "stack_out": [
+        "\"Vehicle \"",
+        "registration#0 (copy)"
+      ]
+    },
+    "227": {
+      "op": "concat",
+      "defined_out": [
+        "tmp%0#0"
+      ],
+      "stack_out": [
+        "tmp%0#0"
+      ]
+    },
+    "228": {
+      "op": "pushbytes \" registered\"",
+      "defined_out": [
+        "\" registered\"",
+        "tmp%0#0"
+      ],
+      "stack_out": [
+        "tmp%0#0",
+        "\" registered\""
+      ]
+    },
+    "241": {
+      "op": "concat",
+      "defined_out": [
+        "tmp%1#0"
+      ],
+      "stack_out": [
+        "tmp%1#0"
+      ]
+    },
+    "242": {
+      "retsub": true,
+      "op": "retsub"
+    },
+    "243": {
+      "subroutine": "smart_contracts/irish_vehicle_registry/contract.algo.ts::IrishVehicleRegistry.transferOwnership",
+      "params": {
+        "registration#0": "bytes",
+        "newOwner#0": "bytes"
+      },
+      "block": "transferOwnership",
+      "stack_in": [],
+      "op": "proto 2 1"
+    },
+    "246": {
+      "op": "frame_dig -2",
+      "defined_out": [
+        "registration#0 (copy)"
+      ],
+      "stack_out": [
+        "registration#0 (copy)"
+      ]
+    },
+    "248": {
+      "op": "pushbytes \" transferred to \"",
+      "defined_out": [
+        "\" transferred to \"",
+        "registration#0 (copy)"
+      ],
+      "stack_out": [
+        "registration#0 (copy)",
+        "\" transferred to \""
+      ]
+    },
+    "266": {
+      "op": "concat",
+      "defined_out": [
+        "tmp%1#0"
+      ],
+      "stack_out": [
+        "tmp%1#0"
+      ]
+    },
+    "267": {
+      "op": "frame_dig -1",
+      "defined_out": [
+        "newOwner#0 (copy)",
+        "tmp%1#0"
+      ],
+      "stack_out": [
+        "tmp%1#0",
+        "newOwner#0 (copy)"
+      ]
+    },
+    "269": {
+      "op": "concat",
+      "defined_out": [
+        "tmp%2#0"
+      ],
+      "stack_out": [
+        "tmp%2#0"
+      ]
+    },
+    "270": {
+      "retsub": true,
+      "op": "retsub"
+    },
+    "271": {
+      "subroutine": "smart_contracts/irish_vehicle_registry/contract.algo.ts::IrishVehicleRegistry.addServiceRecord",
+      "params": {
+        "registration#0": "bytes",
+        "serviceType#0": "bytes"
+      },
+      "block": "addServiceRecord",
+      "stack_in": [],
+      "op": "proto 2 1"
+    },
+    "274": {
+      "op": "pushbytes \"Service \"",
+      "defined_out": [
+        "\"Service \""
+      ],
+      "stack_out": [
+        "\"Service \""
+      ]
+    },
+    "284": {
+      "op": "frame_dig -1",
+      "defined_out": [
+        "\"Service \"",
+        "serviceType#0 (copy)"
+      ],
+      "stack_out": [
+        "\"Service \"",
+        "serviceType#0 (copy)"
+      ]
+    },
+    "286": {
+      "op": "concat",
+      "defined_out": [
+        "tmp%0#0"
+      ],
+      "stack_out": [
+        "tmp%0#0"
+      ]
+    },
+    "287": {
+      "op": "pushbytes \" recorded for \"",
+      "defined_out": [
+        "\" recorded for \"",
+        "tmp%0#0"
+      ],
+      "stack_out": [
+        "tmp%0#0",
+        "\" recorded for \""
+      ]
+    },
+    "303": {
+      "op": "concat",
+      "defined_out": [
+        "tmp%1#0"
+      ],
+      "stack_out": [
+        "tmp%1#0"
+      ]
+    },
+    "304": {
+      "op": "frame_dig -2",
+      "defined_out": [
+        "registration#0 (copy)",
+        "tmp%1#0"
+      ],
+      "stack_out": [
+        "tmp%1#0",
+        "registration#0 (copy)"
+      ]
+    },
+    "306": {
+      "op": "concat",
+      "defined_out": [
+        "tmp%2#0"
+      ],
+      "stack_out": [
+        "tmp%2#0"
+      ]
+    },
+    "307": {
+      "retsub": true,
+      "op": "retsub"
+    }
+  }
+}

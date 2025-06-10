@@ -1,9 +1,13 @@
 // src/components/VehicleRegisterButton.tsx
-// Step 2: Simple blockchain registration button
+// Updated with actual contract integration
 
 import React, { useState } from 'react';
 import { useWallet } from '@txnlab/use-wallet-react';
 import { VehicleLogger } from '../utils/logger';
+import { getAlgodConfigFromViteEnvironment } from '../utils/network/getAlgoClientConfigs';
+import { IrishVehicleRegistryClient } from '../contracts/IrishVehicleRegistryClient';
+import * as algokit from '@algorandfoundation/algokit-utils';
+import algosdk from 'algosdk';
 
 interface VehicleRegisterButtonProps {
   vehicleData: {
@@ -14,6 +18,9 @@ interface VehicleRegisterButtonProps {
     year: number;
   };
 }
+
+// Your deployed App ID
+const APP_ID = 1012;
 
 export const VehicleRegisterButton: React.FC<VehicleRegisterButtonProps> = ({ vehicleData }) => {
   const { activeAddress, signTransactions, sendTransactions } = useWallet();
@@ -38,27 +45,58 @@ export const VehicleRegisterButton: React.FC<VehicleRegisterButtonProps> = ({ ve
     setMessage('');
 
     try {
-      // For now, just log the action - we'll add the actual contract call next
-      VehicleLogger.blockchain('Would register vehicle:', {
-        registration: vehicleData.registration,
-        vin: vehicleData.vin,
-        make: vehicleData.make,
-        model: vehicleData.model,
-        year: vehicleData.year,
-        owner: activeAddress
+      // Get Algod client
+      const algodConfig = getAlgodConfigFromViteEnvironment();
+      const algodClient = new algosdk.Algodv2(
+        algodConfig.token,
+        algodConfig.server,
+        algodConfig.port
+      );
+
+      // Create contract client with proper signer
+      const signer = algosdk.makeBasicAccountTransactionSigner({
+        addr: activeAddress,
+        sk: new Uint8Array(0) // This will be replaced by wallet signer
       });
 
-      // Simulate a delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const sender = {
+        addr: activeAddress,
+        signer: async (txns: algosdk.Transaction[]) => {
+          return await signTransactions(txns.map(algokit.toTransactionWithSigner));
+        }
+      };
+
+      const appClient = new IrishVehicleRegistryClient(
+        {
+          appId: APP_ID,
+          sender: sender,
+          resolveBy: 'id',
+        },
+        algodClient
+      );
+
+      // Call the contract
+      VehicleLogger.blockchain('Calling registerVehicle method', {
+        appId: APP_ID,
+        registration: vehicleData.registration
+      });
+
+      const result = await appClient.registerVehicle({
+        registration: vehicleData.registration,
+      });
+
+      VehicleLogger.success('Vehicle registration transaction completed', {
+        txId: result.transaction.txID(),
+        result: result.returnValue
+      });
 
       setStatus('success');
-      setMessage(`Vehicle ${vehicleData.registration} registered successfully!`);
-      VehicleLogger.success('Vehicle registration complete', { registration: vehicleData.registration });
+      setMessage(`✅ ${result.returnValue || 'Vehicle registered successfully!'}`);
 
     } catch (error) {
       VehicleLogger.error('Registration failed', error);
       setStatus('error');
-      setMessage('Failed to register vehicle. Please try again.');
+      setMessage(`Failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setLoading(false);
     }
@@ -79,9 +117,14 @@ export const VehicleRegisterButton: React.FC<VehicleRegisterButtonProps> = ({ ve
           ⚠️ Please connect your wallet to register this vehicle
         </p>
       ) : (
-        <p style={{ color: '#1976d2', fontSize: '14px' }}>
-          Connected wallet: {activeAddress.slice(0, 6)}...{activeAddress.slice(-4)}
-        </p>
+        <div>
+          <p style={{ color: '#1976d2', fontSize: '14px' }}>
+            Connected wallet: {activeAddress.slice(0, 6)}...{activeAddress.slice(-4)}
+          </p>
+          <p style={{ color: '#666', fontSize: '12px' }}>
+            App ID: {APP_ID}
+          </p>
+        </div>
       )}
 
       <button
@@ -110,7 +153,7 @@ export const VehicleRegisterButton: React.FC<VehicleRegisterButtonProps> = ({ ve
           color: '#2e7d32',
           borderRadius: '4px'
         }}>
-          ✅ {message}
+          {message}
         </div>
       )}
 
@@ -131,8 +174,8 @@ export const VehicleRegisterButton: React.FC<VehicleRegisterButtonProps> = ({ ve
         <strong>What happens when you register:</strong>
         <ul style={{ marginLeft: '20px', marginTop: '5px' }}>
           <li>Vehicle data is stored permanently on Algorand blockchain</li>
-          <li>You become the registered owner</li>
-          <li>Registration cannot be altered (only ownership can be transferred)</li>
+          <li>Transaction is recorded with App ID {APP_ID}</li>
+          <li>You can view the transaction in the blockchain explorer</li>
           <li>All data is publicly verifiable</li>
         </ul>
       </div>
