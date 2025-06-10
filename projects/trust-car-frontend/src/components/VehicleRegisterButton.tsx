@@ -1,12 +1,10 @@
 // src/components/VehicleRegisterButton.tsx
-// Updated with actual contract integration
+// Simplified version using direct contract calls
 
 import React, { useState } from 'react';
 import { useWallet } from '@txnlab/use-wallet-react';
 import { VehicleLogger } from '../utils/logger';
 import { getAlgodConfigFromViteEnvironment } from '../utils/network/getAlgoClientConfigs';
-import { IrishVehicleRegistryClient } from '../contracts/IrishVehicleRegistryClient';
-import * as algokit from '@algorandfoundation/algokit-utils';
 import algosdk from 'algosdk';
 
 interface VehicleRegisterButtonProps {
@@ -53,50 +51,99 @@ export const VehicleRegisterButton: React.FC<VehicleRegisterButtonProps> = ({ ve
         algodConfig.port
       );
 
-      // Create contract client with proper signer
-      const signer = algosdk.makeBasicAccountTransactionSigner({
-        addr: activeAddress,
-        sk: new Uint8Array(0) // This will be replaced by wallet signer
+      // Get suggested params
+      const suggestedParams = await algodClient.getTransactionParams().do();
+
+      // Create the application call transaction
+      const encoder = new TextEncoder();
+
+      // Get the ABI method signature
+      const method = algosdk.ABIMethod.fromSignature("registerVehicle(string)string");
+
+      // Encode the arguments properly
+      const methodSelector = method.getSelector();
+      const encodedArg = algosdk.ABIType.from("string").encode(vehicleData.registration);
+
+      const appArgs = [
+        methodSelector,
+        encodedArg
+      ];
+
+      // Debug log
+      VehicleLogger.blockchain('Creating transaction with params', {
+        from: activeAddress,
+        appIndex: APP_ID,
+        hasAlgosdk: !!algosdk,
+        hasMakeApplicationNoOpTxnFromObject: !!algosdk?.makeApplicationNoOpTxnFromObject
       });
 
-      const sender = {
-        addr: activeAddress,
-        signer: async (txns: algosdk.Transaction[]) => {
-          return await signTransactions(txns.map(algokit.toTransactionWithSigner));
-        }
-      };
+      const txn = algosdk.makeApplicationNoOpTxnFromObject({
+        sender: activeAddress,  // Changed from 'from' to 'sender'
+        appIndex: APP_ID,
+        appArgs: appArgs,
+        suggestedParams: suggestedParams,
+      });
 
-      const appClient = new IrishVehicleRegistryClient(
-        {
-          appId: APP_ID,
-          sender: sender,
-          resolveBy: 'id',
-        },
-        algodClient
-      );
-
-      // Call the contract
-      VehicleLogger.blockchain('Calling registerVehicle method', {
+      VehicleLogger.blockchain('Transaction created', {
         appId: APP_ID,
-        registration: vehicleData.registration
+        method: 'registerVehicle',
+        args: vehicleData.registration
       });
 
-      const result = await appClient.registerVehicle({
-        registration: vehicleData.registration,
+      // Sign transaction using wallet - properly encode for wallet
+      const txnB64 = algosdk.encodeUnsignedTransaction(txn);
+
+      VehicleLogger.blockchain('Requesting signature from wallet');
+
+      // The wallet expects base64 encoded transactions
+      const signedTxns = await signTransactions([txnB64]);
+
+      VehicleLogger.blockchain('Transaction signed');
+
+      // Send the signed transaction
+      const response = await algodClient.sendRawTransaction(signedTxns[0]).do();
+      const txId = response.txid || response.txId || response;
+
+      VehicleLogger.blockchain('Transaction sent successfully', { txId, fullResponse: response });
+
+      // Wait for confirmation
+      const result = await algosdk.waitForConfirmation(algodClient, txId, 4);
+
+      VehicleLogger.success('Vehicle registration transaction confirmed', {
+        txId: txId,
+        confirmedRound: result['confirmed-round']
       });
 
-      VehicleLogger.success('Vehicle registration transaction completed', {
-        txId: result.transaction.txID(),
-        result: result.returnValue
-      });
+      // Extract return value if any
+      let returnValue = "Vehicle registered successfully!";
+      if (result['logs'] && result['logs'].length > 0) {
+        // Try to decode the return value from logs
+        try {
+          const decoder = new TextDecoder();
+          returnValue = decoder.decode(result['logs'][0]);
+        } catch (e) {
+          // Use default message if decode fails
+        }
+      }
 
       setStatus('success');
-      setMessage(`✅ ${result.returnValue || 'Vehicle registered successfully!'}`);
+      setMessage(`✅ ${returnValue} (Tx: ${txId.substring(0, 8)}...)`);
 
-    } catch (error) {
+    } catch (error: any) {
       VehicleLogger.error('Registration failed', error);
+
+      // Better error handling
+      let errorMessage = 'Unknown error';
+      if (error?.message) {
+        errorMessage = error.message;
+      } else if (error?.response?.text) {
+        errorMessage = error.response.text;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      }
+
       setStatus('error');
-      setMessage(`Failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setMessage(`Failed: ${errorMessage}`);
     } finally {
       setLoading(false);
     }
