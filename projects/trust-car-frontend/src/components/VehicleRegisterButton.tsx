@@ -21,7 +21,7 @@ interface VehicleRegisterButtonProps {
 const APP_ID = 1012;
 
 export const VehicleRegisterButton: React.FC<VehicleRegisterButtonProps> = ({ vehicleData }) => {
-  const { activeAddress, signTransactions, sendTransactions } = useWallet();
+  const { activeAddress, signTransactions } = useWallet();
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [message, setMessage] = useState('');
@@ -46,7 +46,7 @@ export const VehicleRegisterButton: React.FC<VehicleRegisterButtonProps> = ({ ve
       // Get Algod client
       const algodConfig = getAlgodConfigFromViteEnvironment();
       const algodClient = new algosdk.Algodv2(
-        algodConfig.token,
+        algodConfig.token as string,
         algodConfig.server,
         algodConfig.port
       );
@@ -102,7 +102,7 @@ export const VehicleRegisterButton: React.FC<VehicleRegisterButtonProps> = ({ ve
 
       // Send the signed transaction
       const response = await algodClient.sendRawTransaction(signedTxns[0]).do();
-      const txId = response.txid || response.txId || response;
+      const txId = response.txid; // lowercase 'txid'
 
       VehicleLogger.blockchain('Transaction sent successfully', { txId, fullResponse: response });
 
@@ -111,7 +111,7 @@ export const VehicleRegisterButton: React.FC<VehicleRegisterButtonProps> = ({ ve
 
       VehicleLogger.success('Vehicle registration transaction confirmed', {
         txId: txId,
-        confirmedRound: result['confirmed-round']
+        confirmedRound: result.confirmedRound || result['confirmed-round']
       });
 
       // Extract return value if any
