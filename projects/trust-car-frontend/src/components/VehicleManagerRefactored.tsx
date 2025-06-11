@@ -1,10 +1,12 @@
-// src/components/VehicleManager.tsx
+// src/components/VehicleManagerComplete.tsx
 import React, { useState } from 'react';
 import { useVehicleSearch } from '../hooks/useVehicleSearch';
-import { useBlockchainTransaction } from '../hooks/useBlockchainTransaction';
+import { useSimpleBlockchain as useBlockchainTransaction } from '../hooks/useSimpleBlockchain';
 import { LoadingSpinner } from './common/LoadingSpinner';
 import { ErrorMessage } from './common/ErrorMessage';
 import { SuccessMessage } from './common/SuccessMessage';
+import { VehicleHistory } from './VehicleHistory';
+import ConnectWallet from './ConnectWallet';
 import { SERVICE_TYPES, TEST_VEHICLES } from '../constants';
 import { BlockchainAction } from '../types/blockchain';
 import { VehicleLogger } from '../utils/logger';
@@ -15,6 +17,8 @@ export const VehicleManager: React.FC = () => {
   const [newOwner, setNewOwner] = useState('');
   const [serviceType, setServiceType] = useState('');
   const [serviceMileage, setServiceMileage] = useState('');
+  const [showHistory, setShowHistory] = useState(false);
+  const [openWalletModal, setOpenWalletModal] = useState(false);
 
   const { vehicleData, loading: searchLoading, error: searchError, searchVehicle } = useVehicleSearch();
   const {
@@ -76,6 +80,53 @@ export const VehicleManager: React.FC = () => {
       <h1 style={{ textAlign: 'center', marginBottom: '30px' }}>
         Irish Vehicle Registry - Blockchain Manager
       </h1>
+
+      {/* Wallet Connection Button */}
+      {!isWalletConnected && (
+        <div style={{
+          textAlign: 'center',
+          marginBottom: '20px',
+          padding: '15px',
+          backgroundColor: '#e3f2fd',
+          borderRadius: '8px',
+          border: '1px solid #1976d2'
+        }}>
+          <p style={{ marginBottom: '10px', color: '#1976d2', fontWeight: 'bold' }}>
+            🔗 Connect your TestNet wallet to get started
+          </p>
+          <button
+            onClick={() => setOpenWalletModal(true)}
+            style={{
+              padding: '10px 20px',
+              fontSize: '16px',
+              backgroundColor: '#1976d2',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontWeight: 'bold'
+            }}
+          >
+            Connect Wallet
+          </button>
+        </div>
+      )}
+
+      {/* Wallet Status */}
+      {isWalletConnected && (
+        <div style={{
+          textAlign: 'center',
+          marginBottom: '20px',
+          padding: '10px',
+          backgroundColor: '#c8e6c9',
+          borderRadius: '8px',
+          border: '1px solid #4CAF50'
+        }}>
+          <p style={{ margin: 0, color: '#2e7d32', fontWeight: 'bold' }}>
+            ✅ Wallet Connected: {walletAddress?.slice(0, 8)}...{walletAddress?.slice(-6)}
+          </p>
+        </div>
+      )}
 
       {/* Search Section */}
       <section style={{ backgroundColor: 'white', padding: '20px', borderRadius: '8px', marginBottom: '20px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
@@ -143,172 +194,223 @@ export const VehicleManager: React.FC = () => {
 
       {/* Vehicle Details & Actions */}
       {vehicleData && !searchLoading && (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-          {/* Vehicle Info Card */}
-          <section style={{
-            backgroundColor: 'white',
-            padding: '20px',
-            borderRadius: '8px',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+        <>
+          {/* Tab Navigation */}
+          <div style={{
+            display: 'flex',
+            gap: '8px',
+            marginBottom: '20px'
           }}>
-            <h3>Vehicle Details</h3>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <tbody>
-                {[
-                  { label: 'Registration', value: vehicleData.registration },
-                  { label: 'VIN', value: vehicleData.vin },
-                  { label: 'Make/Model', value: `${vehicleData.make} ${vehicleData.model}` },
-                  { label: 'Year', value: vehicleData.year },
-                  { label: 'Color', value: vehicleData.color || 'N/A' },
-                  { label: 'Fuel Type', value: vehicleData.fuelType },
-                  { label: 'Engine Size', value: vehicleData.engineSize },
-                ].map(({ label, value }) => (
-                  <tr key={label} style={{ borderBottom: '1px solid #eee' }}>
-                    <td style={{ padding: '10px', fontWeight: 'bold' }}>{label}:</td>
-                    <td style={{ padding: '10px' }}>{value}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </section>
+            <button
+              onClick={() => setShowHistory(false)}
+              style={{
+                padding: '10px 20px',
+                backgroundColor: !showHistory ? '#1976d2' : '#e0e0e0',
+                color: !showHistory ? 'white' : 'black',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontWeight: !showHistory ? 'bold' : 'normal'
+              }}
+            >
+              📄 Vehicle Details
+            </button>
+            <button
+              onClick={() => setShowHistory(true)}
+              style={{
+                padding: '10px 20px',
+                backgroundColor: showHistory ? '#1976d2' : '#e0e0e0',
+                color: showHistory ? 'white' : 'black',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontWeight: showHistory ? 'bold' : 'normal'
+              }}
+            >
+              📜 Transaction History
+            </button>
+          </div>
 
-          {/* Blockchain Actions Card */}
-          <section style={{
-            backgroundColor: 'white',
-            padding: '20px',
-            borderRadius: '8px',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-          }}>
-            <h3>Blockchain Actions</h3>
+          {!showHistory ? (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+              {/* Vehicle Info Card */}
+              <section style={{
+                backgroundColor: 'white',
+                padding: '20px',
+                borderRadius: '8px',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+              }}>
+                <h3>Vehicle Details</h3>
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <tbody>
+                    {[
+                      { label: 'Registration', value: vehicleData.registration },
+                      { label: 'VIN', value: vehicleData.vin },
+                      { label: 'Make/Model', value: `${vehicleData.make} ${vehicleData.model}` },
+                      { label: 'Year', value: vehicleData.year },
+                      { label: 'Color', value: vehicleData.color || 'N/A' },
+                      { label: 'Fuel Type', value: vehicleData.fuelType },
+                      { label: 'Engine Size', value: vehicleData.engineSize },
+                    ].map(({ label, value }) => (
+                      <tr key={label} style={{ borderBottom: '1px solid #eee' }}>
+                        <td style={{ padding: '10px', fontWeight: 'bold' }}>{label}:</td>
+                        <td style={{ padding: '10px' }}>{value}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </section>
 
-            {!isWalletConnected ? (
-              <ErrorMessage message="Please connect your wallet to perform blockchain actions" />
-            ) : (
-              <>
-                <p style={{ fontSize: '14px', color: '#666', marginBottom: '15px' }}>
-                  Wallet: {walletAddress?.slice(0, 6)}...{walletAddress?.slice(-4)}
-                </p>
+              {/* Blockchain Actions Card */}
+              <section style={{
+                backgroundColor: 'white',
+                padding: '20px',
+                borderRadius: '8px',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+              }}>
+                <h3>Blockchain Actions</h3>
 
-                {/* Action Buttons */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '15px' }}>
-                  {(['register', 'transfer', 'service'] as const).map((action) => (
-                    <button
-                      key={action}
-                      onClick={() => setActiveAction(action)}
-                      disabled={txLoading}
-                      style={{
-                        padding: '10px',
-                        backgroundColor: activeAction === action ? '#1976d2' : '#e0e0e0',
-                        color: activeAction === action ? 'white' : 'black',
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: txLoading ? 'not-allowed' : 'pointer',
-                        textTransform: 'capitalize',
-                        ...(action === 'service' && { gridColumn: 'span 2' })
-                      }}
-                    >
-                      {action === 'register' && 'Register Vehicle'}
-                      {action === 'transfer' && 'Transfer Ownership'}
-                      {action === 'service' && 'Add Service Record'}
-                    </button>
-                  ))}
-                </div>
+                {!isWalletConnected ? (
+                  <ErrorMessage message="Please connect your wallet to perform blockchain actions" />
+                ) : (
+                  <>
+                    <p style={{ fontSize: '14px', color: '#666', marginBottom: '15px' }}>
+                      Wallet: {walletAddress?.slice(0, 6)}...{walletAddress?.slice(-4)}
+                    </p>
 
-                {/* Action Forms */}
-                {activeAction && !txLoading && (
-                  <div style={{ backgroundColor: '#f5f5f5', padding: '15px', borderRadius: '4px', marginBottom: '15px' }}>
-                    {activeAction === 'register' && (
-                      <div>
-                        <h4>Register Vehicle</h4>
-                        <p>This will permanently record {vehicleData.registration} on the Algorand blockchain.</p>
-                      </div>
-                    )}
-
-                    {activeAction === 'transfer' && (
-                      <div>
-                        <h4>Transfer Ownership</h4>
-                        <input
-                          type="text"
-                          placeholder="New owner address (e.g., KHXEW77SJC...)"
-                          value={newOwner}
-                          onChange={(e) => setNewOwner(e.target.value)}
+                    {/* Action Buttons */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '15px' }}>
+                      {(['register', 'transfer', 'service'] as const).map((action) => (
+                        <button
+                          key={action}
+                          onClick={() => setActiveAction(action)}
+                          disabled={txLoading}
                           style={{
-                            width: '100%',
-                            padding: '8px',
-                            marginBottom: '10px',
-                            border: '1px solid #ddd',
-                            borderRadius: '4px'
-                          }}
-                        />
-                      </div>
-                    )}
-
-                    {activeAction === 'service' && (
-                      <div>
-                        <h4>Add Service Record</h4>
-                        <select
-                          value={serviceType}
-                          onChange={(e) => setServiceType(e.target.value)}
-                          style={{
-                            width: '100%',
-                            padding: '8px',
-                            marginBottom: '10px',
-                            border: '1px solid #ddd',
-                            borderRadius: '4px'
+                            padding: '10px',
+                            backgroundColor: activeAction === action ? '#1976d2' : '#e0e0e0',
+                            color: activeAction === action ? 'white' : 'black',
+                            border: 'none',
+                            borderRadius: '4px',
+                            cursor: txLoading ? 'not-allowed' : 'pointer',
+                            textTransform: 'capitalize',
+                            ...(action === 'service' && { gridColumn: 'span 2' })
                           }}
                         >
-                          <option value="">Select service type</option>
-                          {SERVICE_TYPES.map(type => (
-                            <option key={type.value} value={type.label}>
-                              {type.label}
-                            </option>
-                          ))}
-                        </select>
-                        <input
-                          type="number"
-                          placeholder="Mileage (km)"
-                          value={serviceMileage}
-                          onChange={(e) => setServiceMileage(e.target.value)}
+                          {action === 'register' && 'Register Vehicle'}
+                          {action === 'transfer' && 'Transfer Ownership'}
+                          {action === 'service' && 'Add Service Record'}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Action Forms */}
+                    {activeAction && !txLoading && (
+                      <div style={{ backgroundColor: '#f5f5f5', padding: '15px', borderRadius: '4px', marginBottom: '15px' }}>
+                        {activeAction === 'register' && (
+                          <div>
+                            <h4>Register Vehicle</h4>
+                            <p>This will permanently record {vehicleData.registration} on the Algorand blockchain.</p>
+                          </div>
+                        )}
+
+                        {activeAction === 'transfer' && (
+                          <div>
+                            <h4>Transfer Ownership</h4>
+                            <input
+                              type="text"
+                              placeholder="New owner address (e.g., KHXEW77SJC...)"
+                              value={newOwner}
+                              onChange={(e) => setNewOwner(e.target.value)}
+                              style={{
+                                width: '100%',
+                                padding: '8px',
+                                marginBottom: '10px',
+                                border: '1px solid #ddd',
+                                borderRadius: '4px'
+                              }}
+                            />
+                          </div>
+                        )}
+
+                        {activeAction === 'service' && (
+                          <div>
+                            <h4>Add Service Record</h4>
+                            <select
+                              value={serviceType}
+                              onChange={(e) => setServiceType(e.target.value)}
+                              style={{
+                                width: '100%',
+                                padding: '8px',
+                                marginBottom: '10px',
+                                border: '1px solid #ddd',
+                                borderRadius: '4px'
+                              }}
+                            >
+                              <option value="">Select service type</option>
+                              {SERVICE_TYPES.map(type => (
+                                <option key={type.value} value={type.label}>
+                                  {type.label}
+                                </option>
+                              ))}
+                            </select>
+                            <input
+                              type="number"
+                              placeholder="Mileage (km)"
+                              value={serviceMileage}
+                              onChange={(e) => setServiceMileage(e.target.value)}
+                              style={{
+                                width: '100%',
+                                padding: '8px',
+                                border: '1px solid #ddd',
+                                borderRadius: '4px'
+                              }}
+                            />
+                          </div>
+                        )}
+
+                        <button
+                          onClick={handleExecuteAction}
+                          disabled={txLoading}
                           style={{
                             width: '100%',
-                            padding: '8px',
-                            border: '1px solid #ddd',
-                            borderRadius: '4px'
+                            padding: '10px',
+                            backgroundColor: '#4CAF50',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                            marginTop: '10px'
                           }}
-                        />
+                        >
+                          Execute {activeAction}
+                        </button>
                       </div>
                     )}
 
-                    <button
-                      onClick={handleExecuteAction}
-                      disabled={txLoading}
-                      style={{
-                        width: '100%',
-                        padding: '10px',
-                        backgroundColor: '#4CAF50',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                        marginTop: '10px'
-                      }}
-                    >
-                      Execute {activeAction}
-                    </button>
-                  </div>
+                    {/* Loading State */}
+                    {txLoading && <LoadingSpinner size="small" message="Processing transaction..." />}
+
+                    {/* Transaction Results */}
+                    {txError && <ErrorMessage message={txError} />}
+                    {txResult && <SuccessMessage message="Transaction successful!" txId={txResult.txId} />}
+                  </>
                 )}
-
-                {/* Loading State */}
-                {txLoading && <LoadingSpinner size="small" message="Processing transaction..." />}
-
-                {/* Transaction Results */}
-                {txError && <ErrorMessage message={txError} />}
-                {txResult && <SuccessMessage message="Transaction successful!" txId={txResult.txId} />}
-              </>
-            )}
-          </section>
-        </div>
+              </section>
+            </div>
+          ) : (
+            <VehicleHistory
+              registration={vehicleData.registration}
+              isVisible={showHistory}
+            />
+          )}
+        </>
       )}
+
+      {/* Wallet Connection Modal */}
+      <ConnectWallet
+        openModal={openWalletModal}
+        closeModal={() => setOpenWalletModal(false)}
+      />
     </div>
   );
 };

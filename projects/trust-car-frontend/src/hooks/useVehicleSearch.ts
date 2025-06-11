@@ -1,114 +1,72 @@
 // src/hooks/useVehicleSearch.ts
-import { useState } from 'react';
-import { VehicleData, VehicleApiResponse } from '../types/vehicle';
+import { useState, useCallback } from 'react';
 import { VehicleApiService } from '../services/api/vehicleApi';
+import { VehicleData } from '../types/vehicle';
+import { VehicleLogger } from '../utils/logger';
+
+interface VehicleSearchState {
+  vehicleData: VehicleData | null;
+  loading: boolean;
+  error: string | null;
+}
 
 export const useVehicleSearch = () => {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [vehicleData, setVehicleData] = useState<VehicleData | null>(null);
+  const [state, setState] = useState<VehicleSearchState>({
+    vehicleData: null,
+    loading: false,
+    error: null,
+  });
 
-  const searchVehicle = async (registration: string) => {
-    setError(null);
-    setVehicleData(null);
-    setLoading(true);
+  const vehicleApi = VehicleApiService.getInstance();
+
+  const searchVehicle = useCallback(async (registration: string) => {
+    if (!registration.trim()) {
+      setState(prev => ({ ...prev, error: 'Registration is required' }));
+      return;
+    }
+
+    setState(prev => ({ ...prev, loading: true, error: null }));
+    VehicleLogger.info('Searching for vehicle', { registration });
 
     try {
-      const apiService = VehicleApiService.getInstance();
-      const response = await apiService.searchVehicle(registration);
+      const response = await vehicleApi.searchVehicle(registration.trim());
 
       if (response.success && response.data) {
-        setVehicleData(response.data);
+        setState(prev => ({
+          ...prev,
+          loading: false,
+          vehicleData: response.data!,
+          error: null
+        }));
+        VehicleLogger.success('Vehicle found', response.data);
       } else {
         throw new Error(response.message || 'Vehicle not found');
       }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Search failed';
-      setError(errorMessage);
-    } finally {
-      setLoading(false);
-    }
-  };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Search failed';
+      VehicleLogger.error('Vehicle search failed', error);
 
-  const clearSearch = () => {
-    setVehicleData(null);
-    setError(null);
-  };
+      setState(prev => ({
+        ...prev,
+        loading: false,
+        error: errorMessage,
+        vehicleData: null
+      }));
+    }
+  }, [vehicleApi]);
+
+  const clearVehicle = useCallback(() => {
+    setState({
+      vehicleData: null,
+      loading: false,
+      error: null,
+    });
+  }, []);
 
   return {
-    vehicleData,
-    loading,
-    error,
+    ...state,
     searchVehicle,
-    clearSearch,
+    clearVehicle
   };
 };
 
-// src/hooks/useBlockchainTransaction.ts
-import { useState } from 'react';
-import { useWallet } from '@txnlab/use-wallet-react';
-import { VehicleContractService } from '../services/blockchain/vehicleContract';
-import { TransactionResult } from '../types/blockchain';
-
-export const useBlockchainTransaction = () => {
-  const { activeAddress, signTransactions } = useWallet();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<TransactionResult | null>(null);
-
-  const contractService = new VehicleContractService();
-
-  const execute = async (
-    action: () => Promise<TransactionResult>
-  ): Promise<boolean> => {
-    if (!activeAddress) {
-      setError('Please connect your wallet');
-      return false;
-    }
-
-    setLoading(true);
-    setError(null);
-    setResult(null);
-
-    try {
-      const txResult = await action();
-      setResult(txResult);
-      return true;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Transaction failed';
-      setError(errorMessage);
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const registerVehicle = async (registration: string) => {
-    return execute(() =>
-      contractService.registerVehicle(registration, activeAddress!, signTransactions)
-    );
-  };
-
-  const transferOwnership = async (registration: string, newOwner: string) => {
-    return execute(() =>
-      contractService.transferOwnership(registration, newOwner, activeAddress!, signTransactions)
-    );
-  };
-
-  const addServiceRecord = async (registration: string, serviceDetails: string) => {
-    return execute(() =>
-      contractService.addServiceRecord(registration, serviceDetails, activeAddress!, signTransactions)
-    );
-  };
-
-  return {
-    loading,
-    error,
-    result,
-    registerVehicle,
-    transferOwnership,
-    addServiceRecord,
-    isWalletConnected: !!activeAddress,
-    walletAddress: activeAddress,
-  };
-};

@@ -1,5 +1,5 @@
 // src/constants/index.ts
-export const APP_ID = 1012;
+export const APP_ID = 741037215; // TestNet APP_ID
 export const API_BASE_URL = 'https://irish-vehicle-registry-api.vercel.app';
 
 export const SERVICE_TYPES = [
