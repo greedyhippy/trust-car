@@ -1,217 +1,84 @@
 // src/components/VehicleManager.tsx
-// Comprehensive vehicle management interface
-
 import React, { useState } from 'react';
-import { useWallet } from '@txnlab/use-wallet-react';
+import { useVehicleSearch } from '../hooks/useVehicleSearch';
+import { useBlockchainTransaction } from '../hooks/useBlockchainTransaction';
+import { LoadingSpinner } from './common/LoadingSpinner';
+import { ErrorMessage } from './common/ErrorMessage';
+import { SuccessMessage } from './common/SuccessMessage';
+import { SERVICE_TYPES, TEST_VEHICLES } from '../constants';
+import { BlockchainAction } from '../types/blockchain';
 import { VehicleLogger } from '../utils/logger';
-import { getAlgodConfigFromViteEnvironment } from '../utils/network/getAlgoClientConfigs';
-import algosdk from 'algosdk';
-
-// Vehicle data interface
-interface VehicleData {
-  registration: string;
-  vin: string;
-  make: string;
-  model: string;
-  year: number;
-  color: string;
-  fuelType: string;
-  engineSize: string;
-  owner?: {
-    name?: string;
-    address?: string;
-  };
-}
-
-// Action types
-type ActionType = 'register' | 'transfer' | 'service' | 'info' | null;
-
-const APP_ID = 1012; // Your deployed App ID
-const API_BASE = 'https://irish-vehicle-registry-api.vercel.app';
 
 export const VehicleManager: React.FC = () => {
-  const { activeAddress, signTransactions } = useWallet();
-
-  // State
   const [registration, setRegistration] = useState('');
-  const [vehicleData, setVehicleData] = useState<VehicleData | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [activeAction, setActiveAction] = useState<ActionType>(null);
-  const [actionStatus, setActionStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
-  const [actionMessage, setActionMessage] = useState('');
-
-  // Form inputs for actions
+  const [activeAction, setActiveAction] = useState<BlockchainAction | null>(null);
   const [newOwner, setNewOwner] = useState('');
-  const [serviceMileage, setServiceMileage] = useState('');
   const [serviceType, setServiceType] = useState('');
-  const [serviceProvider, setServiceProvider] = useState('');
+  const [serviceMileage, setServiceMileage] = useState('');
 
-  // Search vehicle from API
-  const searchVehicle = async () => {
-    VehicleLogger.info('Starting vehicle search', { registration });
-    setError(null);
-    setVehicleData(null);
-    setLoading(true);
-    setActiveAction(null);
+  const { vehicleData, loading: searchLoading, error: searchError, searchVehicle } = useVehicleSearch();
+  const {
+    loading: txLoading,
+    error: txError,
+    result: txResult,
+    registerVehicle,
+    transferOwnership,
+    addServiceRecord,
+    isWalletConnected,
+    walletAddress
+  } = useBlockchainTransaction();
 
-    try {
-      const url = `${API_BASE}/api/vehicles/${registration}`;
-      VehicleLogger.api('Calling API', { url });
-
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error(`Vehicle not found (${response.status})`);
-      }
-
-      const result = await response.json();
-      VehicleLogger.success('Vehicle data retrieved', result);
-
-      if (result.success && result.data) {
-        setVehicleData(result.data);
-      } else {
-        throw new Error('Invalid response format');
-      }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-      VehicleLogger.error('Search failed', err);
-      setError(errorMessage);
-    } finally {
-      setLoading(false);
-    }
+  const handleSearch = async () => {
+    if (!registration.trim()) return;
+    await searchVehicle(registration);
   };
 
-  // Execute blockchain action
-  const executeAction = async () => {
-    if (!activeAddress || !vehicleData || !activeAction) return;
+  const handleExecuteAction = async () => {
+    if (!vehicleData || !activeAction) return;
 
-    setActionStatus('loading');
-    setActionMessage('');
+    let success = false;
 
-    try {
-      const algodConfig = getAlgodConfigFromViteEnvironment();
-      const algodClient = new algosdk.Algodv2(
-        algodConfig.token as string,
-        algodConfig.server,
-        algodConfig.port
-      );
+    switch (activeAction) {
+      case 'register':
+        success = await registerVehicle(vehicleData.registration);
+        break;
 
-      const suggestedParams = await algodClient.getTransactionParams().do();
-      let appArgs: Uint8Array[] = [];
-      let logMessage = '';
-
-      // Prepare transaction based on action type
-      switch (activeAction) {
-        case 'register':
-          const registerMethod = algosdk.ABIMethod.fromSignature("registerVehicle(string)string");
-          appArgs = [
-            registerMethod.getSelector(),
-            algosdk.ABIType.from("string").encode(vehicleData.registration)
-          ];
-          logMessage = 'Registering vehicle';
-          break;
-
-        case 'transfer':
-          if (!newOwner) throw new Error('Please enter new owner address');
-          const transferMethod = algosdk.ABIMethod.fromSignature("transferOwnership(string,string)string");
-          appArgs = [
-            transferMethod.getSelector(),
-            algosdk.ABIType.from("string").encode(vehicleData.registration),
-            algosdk.ABIType.from("string").encode(newOwner)
-          ];
-          logMessage = 'Transferring ownership';
-          break;
-
-        case 'service':
-          if (!serviceMileage || !serviceType) throw new Error('Please fill all service details');
-          const serviceMethod = algosdk.ABIMethod.fromSignature("addServiceRecord(string,string)string");
-          appArgs = [
-            serviceMethod.getSelector(),
-            algosdk.ABIType.from("string").encode(vehicleData.registration),
-            algosdk.ABIType.from("string").encode(`${serviceType} at ${serviceMileage}km`)
-          ];
-          logMessage = 'Adding service record';
-          break;
-
-        case 'info':
-          const infoMethod = algosdk.ABIMethod.fromSignature("getInfo()string");
-          appArgs = [infoMethod.getSelector()];
-          logMessage = 'Getting contract info';
-          break;
-      }
-
-      VehicleLogger.blockchain(logMessage, { action: activeAction, registration: vehicleData.registration });
-
-      // Create and sign transaction
-      const txn = algosdk.makeApplicationNoOpTxnFromObject({
-        sender: activeAddress,
-        appIndex: APP_ID,
-        appArgs: appArgs,
-        suggestedParams: suggestedParams,
-      });
-
-      const txnB64 = algosdk.encodeUnsignedTransaction(txn);
-      const signedTxns = await signTransactions([txnB64]);
-
-      // Send transaction
-      const response = await algodClient.sendRawTransaction(signedTxns[0]).do();
-      const txId = response.txid; // lowercase 'txid'
-
-      VehicleLogger.blockchain('Transaction sent', { txId });
-
-      // Wait for confirmation
-      const result = await algosdk.waitForConfirmation(algodClient, txId, 4);
-
-      // Extract return value
-      let returnValue = "Action completed successfully!";
-      if (result['logs'] && result['logs'].length > 0) {
-        try {
-          const decoder = new TextDecoder();
-          // Skip the first 4 bytes (ABI return prefix) and decode the string
-          const logBytes = result['logs'][0];
-          const returnBytes = logBytes.slice(4);
-          const lengthBytes = returnBytes.slice(0, 2);
-          const length = (lengthBytes[0] << 8) | lengthBytes[1];
-          const stringBytes = returnBytes.slice(2, 2 + length);
-          returnValue = decoder.decode(stringBytes);
-        } catch (e) {
-          VehicleLogger.info('Could not decode return value', e);
+      case 'transfer':
+        if (!newOwner.trim()) {
+          VehicleLogger.error('Transfer failed', 'No new owner specified');
+          return;
         }
-      }
+        success = await transferOwnership(vehicleData.registration, newOwner);
+        if (success) setNewOwner('');
+        break;
 
-      setActionStatus('success');
-      setActionMessage(`✅ ${returnValue} (Tx: ${txId.substring(0, 8)}...)`);
-      VehicleLogger.success('Action completed', { action: activeAction, txId, returnValue });
+      case 'service':
+        if (!serviceType || !serviceMileage) {
+          VehicleLogger.error('Service record failed', 'Missing service details');
+          return;
+        }
+        const serviceDetails = `${serviceType} at ${serviceMileage}km`;
+        success = await addServiceRecord(vehicleData.registration, serviceDetails);
+        if (success) {
+          setServiceType('');
+          setServiceMileage('');
+        }
+        break;
+    }
 
-      // Reset form fields
-      if (activeAction === 'transfer') setNewOwner('');
-      if (activeAction === 'service') {
-        setServiceMileage('');
-        setServiceType('');
-        setServiceProvider('');
-      }
-
-    } catch (error: any) {
-      VehicleLogger.error('Action failed', error);
-      setActionStatus('error');
-      setActionMessage(`Failed: ${error.message || 'Unknown error'}`);
+    if (success) {
+      setActiveAction(null);
     }
   };
 
   return (
-    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
+    <div className="vehicle-manager" style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
       <h1 style={{ textAlign: 'center', marginBottom: '30px' }}>
         Irish Vehicle Registry - Blockchain Manager
       </h1>
 
       {/* Search Section */}
-      <div style={{
-        backgroundColor: 'white',
-        padding: '20px',
-        borderRadius: '8px',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-        marginBottom: '20px'
-      }}>
+      <section style={{ backgroundColor: 'white', padding: '20px', borderRadius: '8px', marginBottom: '20px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
         <h2>Search Vehicle</h2>
         <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
           <input
@@ -219,6 +86,7 @@ export const VehicleManager: React.FC = () => {
             placeholder="Enter registration (e.g., 21G99999)"
             value={registration}
             onChange={(e) => setRegistration(e.target.value.toUpperCase())}
+            onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
             style={{
               flex: 1,
               padding: '10px',
@@ -228,8 +96,8 @@ export const VehicleManager: React.FC = () => {
             }}
           />
           <button
-            onClick={searchVehicle}
-            disabled={!registration || loading}
+            onClick={handleSearch}
+            disabled={!registration.trim() || searchLoading}
             style={{
               padding: '10px 20px',
               fontSize: '16px',
@@ -237,37 +105,47 @@ export const VehicleManager: React.FC = () => {
               color: 'white',
               border: 'none',
               borderRadius: '4px',
-              cursor: loading ? 'not-allowed' : 'pointer'
+              cursor: !registration.trim() || searchLoading ? 'not-allowed' : 'pointer',
+              opacity: !registration.trim() || searchLoading ? 0.6 : 1
             }}
           >
-            {loading ? 'Searching...' : 'Search'}
+            {searchLoading ? 'Searching...' : 'Search'}
           </button>
         </div>
 
-        {/* Test registrations */}
+        {/* Test Vehicles */}
         <div style={{ fontSize: '12px', color: '#666' }}>
-          <strong>Test vehicles:</strong> 21G99999 (Tesla), 12D12345 (Corolla), 24L86420 (BMW),
-          16WX7890 (Peugeot), 23G97531 (Lexus)
+          <strong>Test vehicles:</strong> {TEST_VEHICLES.map((v, i) => (
+            <span key={v.registration}>
+              <button
+                onClick={() => setRegistration(v.registration)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#1976d2',
+                  cursor: 'pointer',
+                  textDecoration: 'underline'
+                }}
+              >
+                {v.registration}
+              </button>
+              {` (${v.description})`}
+              {i < TEST_VEHICLES.length - 1 && ', '}
+            </span>
+          ))}
         </div>
 
-        {error && (
-          <div style={{
-            marginTop: '10px',
-            padding: '10px',
-            backgroundColor: '#ffebee',
-            color: '#c62828',
-            borderRadius: '4px'
-          }}>
-            {error}
-          </div>
-        )}
-      </div>
+        {searchError && <ErrorMessage message={searchError} />}
+      </section>
+
+      {/* Loading State */}
+      {searchLoading && <LoadingSpinner message="Searching for vehicle..." />}
 
       {/* Vehicle Details & Actions */}
-      {vehicleData && (
+      {vehicleData && !searchLoading && (
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
           {/* Vehicle Info Card */}
-          <div style={{
+          <section style={{
             backgroundColor: 'white',
             padding: '20px',
             borderRadius: '8px',
@@ -276,40 +154,26 @@ export const VehicleManager: React.FC = () => {
             <h3>Vehicle Details</h3>
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <tbody>
-                <tr style={{ borderBottom: '1px solid #eee' }}>
-                  <td style={{ padding: '10px', fontWeight: 'bold' }}>Registration:</td>
-                  <td style={{ padding: '10px' }}>{vehicleData.registration}</td>
-                </tr>
-                <tr style={{ borderBottom: '1px solid #eee' }}>
-                  <td style={{ padding: '10px', fontWeight: 'bold' }}>VIN:</td>
-                  <td style={{ padding: '10px' }}>{vehicleData.vin}</td>
-                </tr>
-                <tr style={{ borderBottom: '1px solid #eee' }}>
-                  <td style={{ padding: '10px', fontWeight: 'bold' }}>Make/Model:</td>
-                  <td style={{ padding: '10px' }}>{vehicleData.make} {vehicleData.model}</td>
-                </tr>
-                <tr style={{ borderBottom: '1px solid #eee' }}>
-                  <td style={{ padding: '10px', fontWeight: 'bold' }}>Year:</td>
-                  <td style={{ padding: '10px' }}>{vehicleData.year}</td>
-                </tr>
-                <tr style={{ borderBottom: '1px solid #eee' }}>
-                  <td style={{ padding: '10px', fontWeight: 'bold' }}>Color:</td>
-                  <td style={{ padding: '10px' }}>{vehicleData.color || 'N/A'}</td>
-                </tr>
-                <tr style={{ borderBottom: '1px solid #eee' }}>
-                  <td style={{ padding: '10px', fontWeight: 'bold' }}>Fuel Type:</td>
-                  <td style={{ padding: '10px' }}>{vehicleData.fuelType}</td>
-                </tr>
-                <tr>
-                  <td style={{ padding: '10px', fontWeight: 'bold' }}>Engine Size:</td>
-                  <td style={{ padding: '10px' }}>{vehicleData.engineSize}</td>
-                </tr>
+                {[
+                  { label: 'Registration', value: vehicleData.registration },
+                  { label: 'VIN', value: vehicleData.vin },
+                  { label: 'Make/Model', value: `${vehicleData.make} ${vehicleData.model}` },
+                  { label: 'Year', value: vehicleData.year },
+                  { label: 'Color', value: vehicleData.color || 'N/A' },
+                  { label: 'Fuel Type', value: vehicleData.fuelType },
+                  { label: 'Engine Size', value: vehicleData.engineSize },
+                ].map(({ label, value }) => (
+                  <tr key={label} style={{ borderBottom: '1px solid #eee' }}>
+                    <td style={{ padding: '10px', fontWeight: 'bold' }}>{label}:</td>
+                    <td style={{ padding: '10px' }}>{value}</td>
+                  </tr>
+                ))}
               </tbody>
             </table>
-          </div>
+          </section>
 
           {/* Blockchain Actions Card */}
-          <div style={{
+          <section style={{
             backgroundColor: 'white',
             padding: '20px',
             borderRadius: '8px',
@@ -317,86 +181,46 @@ export const VehicleManager: React.FC = () => {
           }}>
             <h3>Blockchain Actions</h3>
 
-            {!activeAddress ? (
-              <p style={{ color: '#d32f2f' }}>
-                ⚠️ Please connect your wallet to perform blockchain actions
-              </p>
+            {!isWalletConnected ? (
+              <ErrorMessage message="Please connect your wallet to perform blockchain actions" />
             ) : (
               <>
                 <p style={{ fontSize: '14px', color: '#666', marginBottom: '15px' }}>
-                  Wallet: {activeAddress.slice(0, 6)}...{activeAddress.slice(-4)} | App ID: {APP_ID}
+                  Wallet: {walletAddress?.slice(0, 6)}...{walletAddress?.slice(-4)}
                 </p>
 
                 {/* Action Buttons */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '20px' }}>
-                  <button
-                    onClick={() => setActiveAction('register')}
-                    style={{
-                      padding: '10px',
-                      backgroundColor: activeAction === 'register' ? '#1976d2' : '#e0e0e0',
-                      color: activeAction === 'register' ? 'white' : 'black',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    Register Vehicle
-                  </button>
-                  <button
-                    onClick={() => setActiveAction('transfer')}
-                    style={{
-                      padding: '10px',
-                      backgroundColor: activeAction === 'transfer' ? '#1976d2' : '#e0e0e0',
-                      color: activeAction === 'transfer' ? 'white' : 'black',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    Transfer Ownership
-                  </button>
-                  <button
-                    onClick={() => setActiveAction('service')}
-                    style={{
-                      padding: '10px',
-                      backgroundColor: activeAction === 'service' ? '#1976d2' : '#e0e0e0',
-                      color: activeAction === 'service' ? 'white' : 'black',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    Add Service Record
-                  </button>
-                  <button
-                    onClick={() => setActiveAction('info')}
-                    style={{
-                      padding: '10px',
-                      backgroundColor: activeAction === 'info' ? '#1976d2' : '#e0e0e0',
-                      color: activeAction === 'info' ? 'white' : 'black',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    Get Contract Info
-                  </button>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '15px' }}>
+                  {(['register', 'transfer', 'service'] as const).map((action) => (
+                    <button
+                      key={action}
+                      onClick={() => setActiveAction(action)}
+                      disabled={txLoading}
+                      style={{
+                        padding: '10px',
+                        backgroundColor: activeAction === action ? '#1976d2' : '#e0e0e0',
+                        color: activeAction === action ? 'white' : 'black',
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: txLoading ? 'not-allowed' : 'pointer',
+                        textTransform: 'capitalize',
+                        ...(action === 'service' && { gridColumn: 'span 2' })
+                      }}
+                    >
+                      {action === 'register' && 'Register Vehicle'}
+                      {action === 'transfer' && 'Transfer Ownership'}
+                      {action === 'service' && 'Add Service Record'}
+                    </button>
+                  ))}
                 </div>
 
                 {/* Action Forms */}
-                {activeAction && (
-                  <div style={{
-                    padding: '15px',
-                    backgroundColor: '#f5f5f5',
-                    borderRadius: '4px',
-                    marginBottom: '15px'
-                  }}>
+                {activeAction && !txLoading && (
+                  <div style={{ backgroundColor: '#f5f5f5', padding: '15px', borderRadius: '4px', marginBottom: '15px' }}>
                     {activeAction === 'register' && (
                       <div>
-                        <h4>Register Vehicle on Blockchain</h4>
-                        <p style={{ fontSize: '14px', color: '#666' }}>
-                          This will permanently record {vehicleData.registration} on the Algorand blockchain.
-                        </p>
+                        <h4>Register Vehicle</h4>
+                        <p>This will permanently record {vehicleData.registration} on the Algorand blockchain.</p>
                       </div>
                     )}
 
@@ -434,11 +258,11 @@ export const VehicleManager: React.FC = () => {
                           }}
                         >
                           <option value="">Select service type</option>
-                          <option value="Oil Change">Oil Change</option>
-                          <option value="Tire Rotation">Tire Rotation</option>
-                          <option value="Brake Service">Brake Service</option>
-                          <option value="General Maintenance">General Maintenance</option>
-                          <option value="Major Service">Major Service</option>
+                          {SERVICE_TYPES.map(type => (
+                            <option key={type.value} value={type.label}>
+                              {type.label}
+                            </option>
+                          ))}
                         </select>
                         <input
                           type="number"
@@ -448,39 +272,16 @@ export const VehicleManager: React.FC = () => {
                           style={{
                             width: '100%',
                             padding: '8px',
-                            marginBottom: '10px',
                             border: '1px solid #ddd',
                             borderRadius: '4px'
                           }}
                         />
-                        <input
-                          type="text"
-                          placeholder="Service provider (optional)"
-                          value={serviceProvider}
-                          onChange={(e) => setServiceProvider(e.target.value)}
-                          style={{
-                            width: '100%',
-                            padding: '8px',
-                            marginBottom: '10px',
-                            border: '1px solid #ddd',
-                            borderRadius: '4px'
-                          }}
-                        />
-                      </div>
-                    )}
-
-                    {activeAction === 'info' && (
-                      <div>
-                        <h4>Get Contract Information</h4>
-                        <p style={{ fontSize: '14px', color: '#666' }}>
-                          Retrieve general information about the smart contract.
-                        </p>
                       </div>
                     )}
 
                     <button
-                      onClick={executeAction}
-                      disabled={actionStatus === 'loading'}
+                      onClick={handleExecuteAction}
+                      disabled={txLoading}
                       style={{
                         width: '100%',
                         padding: '10px',
@@ -488,28 +289,24 @@ export const VehicleManager: React.FC = () => {
                         color: 'white',
                         border: 'none',
                         borderRadius: '4px',
-                        cursor: actionStatus === 'loading' ? 'not-allowed' : 'pointer'
+                        cursor: 'pointer',
+                        marginTop: '10px'
                       }}
                     >
-                      {actionStatus === 'loading' ? 'Processing...' : `Execute ${activeAction}`}
+                      Execute {activeAction}
                     </button>
                   </div>
                 )}
 
-                {/* Status Messages */}
-                {actionMessage && (
-                  <div style={{
-                    padding: '10px',
-                    backgroundColor: actionStatus === 'success' ? '#c8e6c9' : '#ffcdd2',
-                    color: actionStatus === 'success' ? '#2e7d32' : '#c62828',
-                    borderRadius: '4px'
-                  }}>
-                    {actionMessage}
-                  </div>
-                )}
+                {/* Loading State */}
+                {txLoading && <LoadingSpinner size="small" message="Processing transaction..." />}
+
+                {/* Transaction Results */}
+                {txError && <ErrorMessage message={txError} />}
+                {txResult && <SuccessMessage message="Transaction successful!" txId={txResult.txId} />}
               </>
             )}
-          </div>
+          </section>
         </div>
       )}
     </div>
