@@ -1,11 +1,7 @@
 import { SupportedWallet, WalletId, WalletManager, WalletProvider } from '@txnlab/use-wallet-react'
 import { SnackbarProvider } from 'notistack'
-import Home from './Home'
 import { getAlgodConfigFromViteEnvironment, getKmdConfigFromViteEnvironment } from './utils/network/getAlgoClientConfigs'
-import { VehicleSearch } from './components/VehicleSearch'
-import { VehicleManagerSimple } from './components/VehicleManagerSimple'
-import { VehicleManagerV2 } from './components/VehicleManagerV2'
-// import { VehicleManager } from './components/VehicleManager'
+import { VehicleManager } from './components/VehicleManagerRefactored'
 
 let supportedWallets: SupportedWallet[]
 if (import.meta.env.VITE_ALGOD_NETWORK === 'localnet') {
@@ -25,8 +21,6 @@ if (import.meta.env.VITE_ALGOD_NETWORK === 'localnet') {
     { id: WalletId.DEFLY },
     { id: WalletId.PERA },
     { id: WalletId.EXODUS },
-    // If you are interested in WalletConnect v2 provider
-    // refer to https://github.com/TxnLab/use-wallet for detailed integration instructions
   ]
 }
 
@@ -53,10 +47,7 @@ export default function App() {
   return (
     <SnackbarProvider maxSnack={3}>
       <WalletProvider manager={walletManager}>
-        <div>
-          <VehicleManagerV2 />
-          <Home />
-        </div>
+        <VehicleManager />
       </WalletProvider>
     </SnackbarProvider>
   )
