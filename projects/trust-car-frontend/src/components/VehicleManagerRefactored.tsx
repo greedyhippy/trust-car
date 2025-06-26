@@ -23,6 +23,147 @@ export const VehicleManager: React.FC = () => {
   const [showServiceMode, setShowServiceMode] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [openWalletModal, setOpenWalletModal] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(false);
+  const [currentTutorialStep, setCurrentTutorialStep] = useState(0);
+  const [showWelcomeHint, setShowWelcomeHint] = useState(true);
+
+  // Tutorial Steps
+  const tutorialSteps = [
+    {
+      title: "Welcome to TrustCar! 🚗",
+      content: (
+        <div>
+          <p><strong>TrustCar</strong> is a blockchain-powered vehicle management system built on Algorand.</p>
+          <p>This demo will show you how to:</p>
+          <ul>
+            <li>🔍 Search for vehicle information</li>
+            <li>📝 Register vehicles on the blockchain</li>
+            <li>🔄 Transfer ownership between parties</li>
+            <li>🔧 Add service records as a service provider</li>
+          </ul>
+          <p>Let's get started with the guided tour!</p>
+        </div>
+      )
+    },
+    {
+      title: "Step 1: Connect Your Wallet 🔗",
+      content: (
+        <div>
+          <p>First, you need to connect a <strong>TestNet wallet</strong> to interact with the blockchain.</p>
+          <p><strong>Options:</strong></p>
+          <ul>
+            <li><strong>Pera Wallet:</strong> Mobile app with TestNet support</li>
+            <li><strong>Defly Wallet:</strong> Browser extension</li>
+          </ul>
+          <p><strong>⚠️ Important:</strong> Make sure your wallet is set to <em>TestNet</em> mode, not MainNet!</p>
+          <p>Click the "Connect Wallet" button to proceed.</p>
+        </div>
+      )
+    },
+    {
+      title: "Step 2: Search for a Vehicle 🔍",
+      content: (
+        <div>
+          <p>Try searching for a vehicle using an Irish registration number.</p>
+          <p><strong>Demo vehicles available:</strong></p>
+          <ul style={{ fontSize: '14px', maxHeight: '150px', overflowY: 'auto' }}>
+            {AVAILABLE_VEHICLES.slice(0, 5).map(v => (
+              <li key={v.registration}><code>{v.registration}</code> - {v.description}</li>
+            ))}
+            <li><em>...and {AVAILABLE_VEHICLES.length - 5} more!</em></li>
+          </ul>
+          <p>Use the dropdown to select a vehicle or type directly in the license plate field.</p>
+        </div>
+      )
+    },
+    {
+      title: "Step 3: Vehicle Owner Mode 👤",
+      content: (
+        <div>
+          <p>As a <strong>Vehicle Owner</strong>, you can:</p>
+          <ul>
+            <li><strong>📝 Register Vehicle:</strong> Record your vehicle permanently on the Algorand blockchain</li>
+            <li><strong>🔄 Transfer Ownership:</strong> Transfer your vehicle to another wallet address</li>
+          </ul>
+          <p><strong>Registration Process:</strong></p>
+          <ol>
+            <li>Search for your vehicle</li>
+            <li>Click "Register Vehicle"</li>
+            <li>Confirm the transaction in your wallet</li>
+          </ol>
+          <p>The blockchain will store an immutable record of ownership!</p>
+        </div>
+      )
+    },
+    {
+      title: "Step 4: Service Provider Mode 🔧",
+      content: (
+        <div>
+          <p>Switch to <strong>Service Provider</strong> mode to add service records.</p>
+          <p><strong>Available service types:</strong></p>
+          <ul style={{ fontSize: '14px', maxHeight: '120px', overflowY: 'auto' }}>
+            {SERVICE_TYPES.map(type => (
+              <li key={type.value}><strong>{type.label}</strong></li>
+            ))}
+          </ul>
+          <p><strong>Process:</strong></p>
+          <ol>
+            <li>Select service type</li>
+            <li>Enter current mileage</li>
+            <li>For maintenance services, select vehicle condition</li>
+            <li>Submit to blockchain</li>
+          </ol>
+        </div>
+      )
+    },
+    {
+      title: "Step 5: Transaction History 📜",
+      content: (
+        <div>
+          <p>View the complete transaction history for any vehicle:</p>
+          <ul>
+            <li><strong>🔍 Search Results:</strong> View vehicle details and photos</li>
+            <li><strong>⛓️ Blockchain Records:</strong> See all on-chain transactions</li>
+            <li><strong>📜 Service History:</strong> Complete maintenance timeline</li>
+          </ul>
+          <p>Click the "Transaction History" tab after searching for a vehicle.</p>
+          <p><strong>Pro Tip:</strong> All data is stored immutably on Algorand - no one can tamper with the records!</p>
+        </div>
+      )
+    },
+    {
+      title: "You're Ready! 🎉",
+      content: (
+        <div>
+          <p><strong>Congratulations!</strong> You now know how to use TrustCar.</p>
+          <p><strong>Key Benefits:</strong></p>
+          <ul>
+            <li>🔒 <strong>Immutable Records:</strong> Blockchain prevents fraud</li>
+            <li>🌐 <strong>Decentralized:</strong> No single point of failure</li>
+            <li>📱 <strong>Mobile-First:</strong> Works on any device</li>
+            <li>💡 <strong>Transparent:</strong> All transactions are public</li>
+          </ul>
+          <p>Start exploring by connecting your wallet and searching for a vehicle!</p>
+          <p><em>Need help? Click the purple help button (?) anytime.</em></p>
+        </div>
+      )
+    }
+  ];
+
+  const nextTutorialStep = () => {
+    if (currentTutorialStep < tutorialSteps.length - 1) {
+      setCurrentTutorialStep(currentTutorialStep + 1);
+    } else {
+      setShowTutorial(false);
+      setCurrentTutorialStep(0);
+    }
+  };
+
+  const prevTutorialStep = () => {
+    if (currentTutorialStep > 0) {
+      setCurrentTutorialStep(currentTutorialStep - 1);
+    }
+  };
 
   const { vehicleData, loading: searchLoading, error: searchError, searchVehicle } = useVehicleSearch();
   const {
@@ -80,36 +221,76 @@ export const VehicleManager: React.FC = () => {
           from { transform: translateX(-20px); opacity: 0; }
           to { transform: translateX(0); opacity: 1; }
         }
+        @keyframes pulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.05); }
+        }
+        @keyframes glow {
+          0%, 100% { box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3); }
+          50% { box-shadow: 0 8px 25px rgba(33, 150, 243, 0.6); }
+        }
         .fade-in {
           animation: fadeIn 0.6s ease-out;
         }
         .slide-in {
           animation: slideIn 0.4s ease-out;
         }
+        .pulse {
+          animation: pulse 2s ease-in-out infinite;
+        }
         .glass-card {
-          background: rgba(255, 255, 255, 0.9);
-          backdrop-filter: blur(10px);
-          border: 1px solid rgba(255, 255, 255, 0.2);
-          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+          background: rgba(255, 255, 255, 0.95);
+          backdrop-filter: blur(15px);
+          border: 1px solid rgba(255, 255, 255, 0.3);
+          box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+          border-radius: 20px;
+          transition: all 0.3s ease;
+        }
+        .glass-card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 16px 50px rgba(0, 0, 0, 0.2);
         }
         .gradient-bg {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #667eea 100%);
+          background-size: 200% 200%;
+          animation: gradientShift 8s ease infinite;
           min-height: 100vh;
+        }
+        @keyframes gradientShift {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
         }
         .btn-modern {
           background: linear-gradient(145deg, #4CAF50, #45a049);
           border: none;
           color: white;
-          padding: 12px 24px;
-          border-radius: 12px;
+          padding: 14px 28px;
+          border-radius: 14px;
           cursor: pointer;
           font-weight: 600;
+          font-size: 16px;
           transition: all 0.3s ease;
-          box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+          box-shadow: 0 6px 20px rgba(76, 175, 80, 0.3);
+          position: relative;
+          overflow: hidden;
+        }
+        .btn-modern:before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+          transition: left 0.5s;
+        }
+        .btn-modern:hover:before {
+          left: 100%;
         }
         .btn-modern:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+          transform: translateY(-3px);
+          box-shadow: 0 8px 25px rgba(76, 175, 80, 0.4);
         }
         .btn-modern:disabled {
           opacity: 0.6;
@@ -121,15 +302,32 @@ export const VehicleManager: React.FC = () => {
           background: linear-gradient(145deg, #2196F3, #1976D2);
           border: none;
           color: white;
-          padding: 10px 20px;
-          border-radius: 8px;
+          padding: 12px 24px;
+          border-radius: 12px;
           cursor: pointer;
-          font-weight: 500;
+          font-weight: 600;
           transition: all 0.3s ease;
+          box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
+          position: relative;
+          overflow: hidden;
+        }
+        .btn-action:before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+          transition: left 0.5s;
+        }
+        .btn-action:hover:before {
+          left: 100%;
         }
         .btn-action:hover {
           background: linear-gradient(145deg, #1976D2, #1565C0);
-          transform: scale(1.02);
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba(33, 150, 243, 0.4);
         }
         .btn-action:disabled {
           opacity: 0.6;
@@ -138,24 +336,139 @@ export const VehicleManager: React.FC = () => {
         }
         .btn-action.active {
           background: linear-gradient(145deg, #FF9800, #F57C00);
-          box-shadow: 0 4px 15px rgba(255, 152, 0, 0.3);
+          box-shadow: 0 6px 20px rgba(255, 152, 0, 0.4);
+          animation: glow 2s ease-in-out infinite;
+        }
+        .btn-help {
+          background: linear-gradient(145deg, #9C27B0, #7B1FA2);
+          border: none;
+          color: white;
+          padding: 12px 24px;
+          border-radius: 50px;
+          cursor: pointer;
+          font-weight: 600;
+          transition: all 0.3s ease;
+          box-shadow: 0 4px 15px rgba(156, 39, 176, 0.3);
+          position: fixed;
+          bottom: 30px;
+          right: 30px;
+          z-index: 1000;
+        }
+        .btn-help:hover {
+          transform: scale(1.1);
+          box-shadow: 0 6px 20px rgba(156, 39, 176, 0.5);
         }
         .input-modern {
-          padding: 15px;
+          padding: 16px;
           font-size: 16px;
-          border: 2px solid #e0e0e0;
-          border-radius: 12px;
+          border: 2px solid #e3f2fd;
+          border-radius: 14px;
           outline: none;
-          transition: border-color 0.3s ease;
-          background: rgba(255, 255, 255, 0.9);
+          transition: all 0.3s ease;
+          background: rgba(255, 255, 255, 0.95);
+          box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
         .input-modern:focus {
           border-color: #2196F3;
-          box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+          box-shadow: 0 0 0 4px rgba(33, 150, 243, 0.1), 0 4px 15px rgba(0,0,0,0.1);
+          transform: translateY(-1px);
+        }
+        .tutorial-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.8);
+          backdrop-filter: blur(8px);
+          z-index: 2000;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          animation: fadeIn 0.3s ease-out;
+        }
+        .tutorial-card {
+          background: white;
+          border-radius: 20px;
+          padding: 30px;
+          max-width: 600px;
+          width: 90%;
+          max-height: 80vh;
+          overflow-y: auto;
+          box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+          animation: slideInUp 0.4s ease-out;
+          position: relative;
+        }
+        @keyframes slideInUp {
+          from {
+            opacity: 0;
+            transform: translateY(30px) scale(0.95);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+        .step-indicator {
+          display: flex;
+          justify-content: center;
+          margin-bottom: 25px;
+          padding: 0 10px;
+        }
+        .step-dot {
+          width: 12px;
+          height: 12px;
+          border-radius: 50%;
+          margin: 0 6px;
+          background: #e0e0e0;
+          transition: all 0.3s ease;
+          cursor: pointer;
+          border: 2px solid transparent;
+        }
+        .step-dot:hover {
+          background: #bdbdbd;
+          transform: scale(1.1);
+        }
+        .step-dot.active {
+          background: linear-gradient(145deg, #2196F3, #1976D2);
+          transform: scale(1.3);
+          border-color: rgba(33, 150, 243, 0.3);
+          box-shadow: 0 0 15px rgba(33, 150, 243, 0.4);
+        }
+        .license-plate-input {
+          display: flex;
+          align-items: center;
+          backgroundColor: #ffffff;
+          border: 3px solid #000000;
+          border-radius: 8px;
+          padding: 0;
+          fontFamily: 'monospace, "Courier New"';
+          fontWeight: bold;
+          fontSize: 20px;
+          boxShadow: 0 4px 8px rgba(0,0,0,0.2), inset 0 2px 4px rgba(0,0,0,0.1);
+          height: 60px;
+          minWidth: 280px;
+          maxWidth: 320px;
+          overflow: hidden;
+          position: relative;
+          transition: all 0.3s ease;
+        }
+        .license-plate-input:hover {
+          box-shadow: 0 6px 12px rgba(0,0,0,0.3), inset 0 2px 4px rgba(0,0,0,0.1);
+          transform: translateY(-1px);
+        }
+        .license-plate-input:focus-within {
+          border-color: #2196F3;
+          box-shadow: 0 0 0 4px rgba(33, 150, 243, 0.2), 0 6px 12px rgba(0,0,0,0.3);
         }
         @media (max-width: 768px) {
           .grid-responsive {
             grid-template-columns: 1fr !important;
+          }
+          .btn-help {
+            bottom: 20px;
+            right: 20px;
+            padding: 10px 20px;
           }
         }
       `}</style>
@@ -171,18 +484,146 @@ export const VehicleManager: React.FC = () => {
                 style={{
                   height: '80px',
                   maxWidth: '400px',
-                  filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))'
+                  filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease'
                 }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'scale(1.05)';
+                  e.currentTarget.style.filter = 'drop-shadow(0 4px 8px rgba(0,0,0,0.4))';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'scale(1)';
+                  e.currentTarget.style.filter = 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))';
+                }}
+                onClick={() => {
+                  setShowTutorial(true);
+                  setCurrentTutorialStep(0);
+                }}
+                title="Click for help and tutorial"
               />
             </div>
             <p style={{
               color: 'rgba(255,255,255,0.9)',
               fontSize: '1.2rem',
-              textShadow: '0 1px 2px rgba(0,0,0,0.3)'
+              textShadow: '0 1px 2px rgba(0,0,0,0.3)',
+              marginBottom: '10px'
             }}>
               Blockchain-Powered Vehicle Management System
             </p>
+            <p style={{
+              color: 'rgba(255,255,255,0.7)',
+              fontSize: '0.9rem',
+              textShadow: '0 1px 2px rgba(0,0,0,0.3)',
+              fontStyle: 'italic'
+            }}>
+              Built on Algorand TestNet • Immutable • Transparent • Secure
+            </p>
           </div>
+
+          {/* Welcome Hint Banner */}
+          {showWelcomeHint && (
+            <div className="glass-card slide-in" style={{
+              marginBottom: '30px',
+              padding: '20px',
+              borderRadius: '16px',
+              background: 'linear-gradient(135deg, rgba(76, 175, 80, 0.1), rgba(33, 150, 243, 0.1))',
+              border: '2px solid rgba(76, 175, 80, 0.3)',
+              position: 'relative'
+            }}>
+              <button
+                onClick={() => setShowWelcomeHint(false)}
+                style={{
+                  position: 'absolute',
+                  top: '10px',
+                  right: '15px',
+                  background: 'none',
+                  border: 'none',
+                  fontSize: '18px',
+                  cursor: 'pointer',
+                  color: '#999',
+                  transition: 'color 0.2s ease'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.color = '#666'}
+                onMouseLeave={(e) => e.currentTarget.style.color = '#999'}
+                title="Dismiss"
+              >
+                ×
+              </button>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '2rem', marginBottom: '10px' }}>👋</div>
+                <h3 style={{
+                  color: '#2e7d32',
+                  marginBottom: '10px',
+                  fontSize: '1.2rem'
+                }}>
+                  Welcome to TrustCar Demo!
+                </h3>
+                <p style={{
+                  color: '#555',
+                  marginBottom: '15px',
+                  lineHeight: '1.5'
+                }}>
+                  New here? Click the <strong>❓ Help</strong> button or the logo above for a guided tour.
+                  Already know what you're doing? Connect your TestNet wallet and start exploring!
+                </p>
+                <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                  <button
+                    onClick={() => {
+                      setShowTutorial(true);
+                      setCurrentTutorialStep(0);
+                      setShowWelcomeHint(false);
+                    }}
+                    style={{
+                      background: 'linear-gradient(145deg, #4CAF50, #45a049)',
+                      border: 'none',
+                      color: 'white',
+                      padding: '8px 16px',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      transition: 'all 0.3s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-1px)';
+                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(76, 175, 80, 0.3)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}
+                  >
+                    📚 Take Tutorial
+                  </button>
+                  <button
+                    onClick={() => setShowWelcomeHint(false)}
+                    style={{
+                      background: 'linear-gradient(145deg, #2196F3, #1976D2)',
+                      border: 'none',
+                      color: 'white',
+                      padding: '8px 16px',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      transition: 'all 0.3s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-1px)';
+                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(33, 150, 243, 0.3)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}
+                  >
+                    🚀 Start Exploring
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Wallet Status */}
           {!isWalletConnected ? (
@@ -270,23 +711,7 @@ export const VehicleManager: React.FC = () => {
 
             <div style={{ display: 'flex', gap: '15px', marginBottom: '20px', alignItems: 'center', justifyContent: 'center' }}>
               {/* European Style Irish License Plate Styled Search Bar */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                backgroundColor: '#ffffff',
-                border: '3px solid #000000',
-                borderRadius: '8px',
-                padding: '0',
-                fontFamily: 'monospace, "Courier New"',
-                fontWeight: 'bold',
-                fontSize: '20px',
-                boxShadow: '0 4px 8px rgba(0,0,0,0.2), inset 0 2px 4px rgba(0,0,0,0.1)',
-                height: '60px',
-                minWidth: '280px',
-                maxWidth: '320px',
-                overflow: 'hidden',
-                position: 'relative'
-              }}>
+              <div className="license-plate-input">
                 {/* EU Stars Strip */}
                 <div style={{
                   backgroundColor: '#003f7f',
@@ -907,6 +1332,160 @@ export const VehicleManager: React.FC = () => {
             openModal={openWalletModal}
             closeModal={() => setOpenWalletModal(false)}
           />
+
+          {/* Help Button */}
+          <button
+            className="btn-help"
+            onClick={() => {
+              setShowTutorial(true);
+              setCurrentTutorialStep(0);
+            }}
+            title="Get help and tutorial"
+          >
+            ❓ Help
+          </button>
+
+          {/* Tutorial Overlay */}
+          {showTutorial && (
+            <div className="tutorial-overlay">
+              <div className="tutorial-card">
+                {/* Step Indicator */}
+                <div className="step-indicator">
+                  {tutorialSteps.map((_, index) => (
+                    <div
+                      key={index}
+                      className={`step-dot ${index <= currentTutorialStep ? 'active' : ''}`}
+                    />
+                  ))}
+                </div>
+
+                {/* Tutorial Content */}
+                <div style={{ marginBottom: '30px' }}>
+                  <h2 style={{
+                    color: '#333',
+                    marginBottom: '20px',
+                    fontSize: '1.5rem',
+                    textAlign: 'center'
+                  }}>
+                    {tutorialSteps[currentTutorialStep].title}
+                  </h2>
+                  <div style={{
+                    color: '#555',
+                    lineHeight: '1.6',
+                    fontSize: '16px'
+                  }}>
+                    {tutorialSteps[currentTutorialStep].content}
+                  </div>
+                </div>
+
+                {/* Navigation Buttons */}
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  paddingTop: '20px',
+                  borderTop: '1px solid #eee'
+                }}>
+                  <div style={{ display: 'flex', gap: '10px' }}>
+                    {currentTutorialStep > 0 && (
+                      <button
+                        onClick={prevTutorialStep}
+                        style={{
+                          background: 'linear-gradient(145deg, #757575, #616161)',
+                          border: 'none',
+                          color: 'white',
+                          padding: '10px 20px',
+                          borderRadius: '8px',
+                          cursor: 'pointer',
+                          fontWeight: '600',
+                          transition: 'all 0.3s ease'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.transform = 'translateY(-1px)';
+                          e.currentTarget.style.boxShadow = '0 4px 12px rgba(117, 117, 117, 0.3)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.transform = 'translateY(0)';
+                          e.currentTarget.style.boxShadow = 'none';
+                        }}
+                      >
+                        ← Previous
+                      </button>
+                    )}
+                    <button
+                      onClick={() => {
+                        setShowTutorial(false);
+                        setCurrentTutorialStep(0);
+                      }}
+                      style={{
+                        background: 'linear-gradient(145deg, #f44336, #d32f2f)',
+                        border: 'none',
+                        color: 'white',
+                        padding: '10px 20px',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        fontWeight: '600',
+                        transition: 'all 0.3s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = 'translateY(-1px)';
+                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(244, 67, 54, 0.3)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = 'translateY(0)';
+                        e.currentTarget.style.boxShadow = 'none';
+                      }}
+                    >
+                      Skip Tutorial
+                    </button>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                    <span style={{
+                      color: '#999',
+                      fontSize: '14px',
+                      fontWeight: '500'
+                    }}>
+                      {currentTutorialStep + 1} of {tutorialSteps.length}
+                    </span>
+                    <button
+                      onClick={nextTutorialStep}
+                      style={{
+                        background: currentTutorialStep === tutorialSteps.length - 1
+                          ? 'linear-gradient(145deg, #4CAF50, #45a049)'
+                          : 'linear-gradient(145deg, #2196F3, #1976D2)',
+                        border: 'none',
+                        color: 'white',
+                        padding: '12px 24px',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        fontWeight: '600',
+                        fontSize: '16px',
+                        transition: 'all 0.3s ease',
+                        boxShadow: currentTutorialStep === tutorialSteps.length - 1
+                          ? '0 4px 15px rgba(76, 175, 80, 0.3)'
+                          : '0 4px 15px rgba(33, 150, 243, 0.3)'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = 'translateY(-2px)';
+                        e.currentTarget.style.boxShadow = currentTutorialStep === tutorialSteps.length - 1
+                          ? '0 6px 20px rgba(76, 175, 80, 0.4)'
+                          : '0 6px 20px rgba(33, 150, 243, 0.4)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = 'translateY(0)';
+                        e.currentTarget.style.boxShadow = currentTutorialStep === tutorialSteps.length - 1
+                          ? '0 4px 15px rgba(76, 175, 80, 0.3)'
+                          : '0 4px 15px rgba(33, 150, 243, 0.3)';
+                      }}
+                    >
+                      {currentTutorialStep === tutorialSteps.length - 1 ? '🎉 Finish' : 'Next →'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </>
