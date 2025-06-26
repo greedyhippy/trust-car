@@ -179,7 +179,7 @@ export const VehicleHistory: React.FC<VehicleHistoryProps> = ({ registration, is
   // Convert TransactionInfo to VehicleHistoryEvent
   const convertTransactionToEvent = (tx: TransactionInfo): VehicleHistoryEvent => {
     let type: VehicleHistoryEvent['type'] = 'unknown';
-    
+
     switch (tx.method) {
       case 'registerVehicle':
         type = 'register';
@@ -214,15 +214,15 @@ export const VehicleHistory: React.FC<VehicleHistoryProps> = ({ registration, is
       try {
         // Get transactions from TransactionMonitor
         const allTransactions = TransactionMonitor.getTransactions();
-        
+
         // Filter by registration if specified
-        const filteredTransactions = registration 
+        const filteredTransactions = registration
           ? allTransactions.filter(tx => tx.registration === registration)
           : allTransactions;
 
         // Convert to VehicleHistoryEvent format
         const convertedEvents = filteredTransactions.map(convertTransactionToEvent);
-        
+
         setEvents(convertedEvents);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to fetch transaction history');
@@ -242,7 +242,7 @@ export const VehicleHistory: React.FC<VehicleHistoryProps> = ({ registration, is
 
   const refreshHistory = () => {
     const allTransactions = TransactionMonitor.getTransactions();
-    const filteredTransactions = registration 
+    const filteredTransactions = registration
       ? allTransactions.filter(tx => tx.registration === registration)
       : allTransactions;
     const convertedEvents = filteredTransactions.map(convertTransactionToEvent);
@@ -329,7 +329,7 @@ export const VehicleHistory: React.FC<VehicleHistoryProps> = ({ registration, is
               No History Found
             </h4>
             <p style={{ margin: 0, fontSize: '14px' }}>
-              {registration 
+              {registration
                 ? `No blockchain transactions found for ${registration}`
                 : 'No blockchain transactions found. Try performing some operations first.'
               }
