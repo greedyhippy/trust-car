@@ -11,6 +11,7 @@ import ConnectWallet from './ConnectWallet';
 import { SERVICE_TYPES, AVAILABLE_VEHICLES } from '../constants';
 import { BlockchainAction } from '../types/blockchain';
 import { VehicleLogger } from '../utils/logger';
+import trustCarLogo from '../assets/trustcar-logo.svg';
 
 export const VehicleManager: React.FC = () => {
   const [registration, setRegistration] = useState('');
@@ -175,15 +176,17 @@ export const VehicleManager: React.FC = () => {
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
           {/* Header */}
           <div className="fade-in" style={{ textAlign: 'center', marginBottom: '40px' }}>
-            <h1 style={{
-              color: 'white',
-              fontSize: '2.5rem',
-              fontWeight: 'bold',
-              textShadow: '0 2px 4px rgba(0,0,0,0.3)',
-              marginBottom: '10px'
-            }}>
-              🚗 Irish Vehicle Registry
-            </h1>
+            <div style={{ marginBottom: '15px' }}>
+              <img
+                src={trustCarLogo}
+                alt="TrustCar Logo"
+                style={{
+                  height: '80px',
+                  maxWidth: '400px',
+                  filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))'
+                }}
+              />
+            </div>
             <p style={{
               color: 'rgba(255,255,255,0.9)',
               fontSize: '1.2rem',
