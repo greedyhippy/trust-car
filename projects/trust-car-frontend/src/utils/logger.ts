@@ -1,27 +1,35 @@
 // src/utils/logger.ts
-// Simple logger utility to help us debug as we build
+// Production-ready logging utility
 
 export const VehicleLogger = {
   info: (message: string, data?: any) => {
-    console.log(`[VEHICLE-INFO] ${new Date().toISOString()} - ${message}`, data || '');
+    // In production, you might want to send to a logging service
+    // For now, keeping minimal logging for critical info only
   },
 
   error: (message: string, error?: any) => {
-    console.error(`[VEHICLE-ERROR] ${new Date().toISOString()} - ${message}`, error || '');
+    // Always log errors to console for debugging
+    console.error(`[ERROR] ${message}`, error || '');
   },
 
   success: (message: string, data?: any) => {
-    console.log(`[VEHICLE-SUCCESS] ✓ ${new Date().toISOString()} - ${message}`, data || '');
+    // Success messages can be logged in development
+    if (import.meta.env.DEV) {
+      console.log(`[SUCCESS] ${message}`, data || '');
+    }
   },
 
   api: (message: string, data?: any) => {
-    console.log(`[VEHICLE-API] ${new Date().toISOString()} - ${message}`, data || '');
+    // API logs only in development
+    if (import.meta.env.DEV) {
+      console.log(`[API] ${message}`, data || '');
+    }
   },
 
   blockchain: (message: string, data?: any) => {
-    console.log(`[VEHICLE-BLOCKCHAIN] ${new Date().toISOString()} - ${message}`, data || '');
+    // Blockchain logs only in development
+    if (import.meta.env.DEV) {
+      console.log(`[BLOCKCHAIN] ${message}`, data || '');
+    }
   }
 };
-
-// Test the logger on load
-VehicleLogger.info('Logger utility loaded successfully');

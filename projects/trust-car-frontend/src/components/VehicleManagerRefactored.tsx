@@ -19,6 +19,7 @@ export const VehicleManager: React.FC = () => {
   const [newOwner, setNewOwner] = useState('');
   const [serviceType, setServiceType] = useState('');
   const [serviceMileage, setServiceMileage] = useState('');
+  const [serviceCondition, setServiceCondition] = useState('');
   const [showHistory, setShowHistory] = useState(false);
   const [openWalletModal, setOpenWalletModal] = useState(false);
 
@@ -51,8 +52,7 @@ export const VehicleManager: React.FC = () => {
 
       case 'transfer':
         if (!newOwner.trim()) {
-          VehicleLogger.error('Transfer failed', 'No new owner specified');
-          return;
+          return; // The validation error will be handled by the blockchain hook
         }
         success = await transferOwnership(vehicleData.registration, newOwner);
         if (success) setNewOwner('');
@@ -60,14 +60,26 @@ export const VehicleManager: React.FC = () => {
 
       case 'service':
         if (!serviceType || !serviceMileage) {
-          VehicleLogger.error('Service record failed', 'Missing service details');
-          return;
+          return; // The validation error will be handled by the blockchain hook
         }
-        const serviceDetails = `${serviceType} at ${serviceMileage}km`;
+
+        // Check if this service type requires condition input
+        const requiresCondition = serviceType === 'General Maintenance' || serviceType === 'Major Service';
+        if (requiresCondition && !serviceCondition.trim()) {
+          return; // Condition is required for these service types
+        }
+
+        // Build service details with condition if applicable
+        let serviceDetails = `${serviceType} at ${serviceMileage}km`;
+        if (requiresCondition && serviceCondition.trim()) {
+          serviceDetails += ` - Condition: ${serviceCondition.trim()}`;
+        }
+
         success = await addServiceRecord(vehicleData.registration, serviceDetails);
         if (success) {
           setServiceType('');
           setServiceMileage('');
+          setServiceCondition('');
         }
         break;
     }
@@ -752,9 +764,27 @@ export const VehicleManager: React.FC = () => {
                                   style={{
                                     width: '100%',
                                     padding: '12px',
-                                    fontSize: '14px'
+                                    fontSize: '14px',
+                                    marginBottom: '12px'
                                   }}
                                 />
+
+                                {/* Condition field for General Maintenance and Major Service */}
+                                {(serviceType === 'General Maintenance' || serviceType === 'Major Service') && (
+                                  <textarea
+                                    placeholder="Vehicle condition notes (e.g., Good, Fair, Needs attention, etc.)"
+                                    value={serviceCondition}
+                                    onChange={(e) => setServiceCondition(e.target.value)}
+                                    className="input-modern"
+                                    style={{
+                                      width: '100%',
+                                      padding: '12px',
+                                      fontSize: '14px',
+                                      minHeight: '80px',
+                                      resize: 'vertical'
+                                    }}
+                                  />
+                                )}
                               </div>
                             )}
 

@@ -34,13 +34,16 @@ export class TransactionMonitor {
   }
 
   static logTransactionDetails(txId: string, method: string, registration?: string) {
-    console.group(`🔗 Transaction Details - ${method}`);
-    console.log(`Transaction ID: ${txId}`);
-    console.log(`View on Lora: ${this.getLoraUrl(txId)}`);
-    if (registration) {
-      console.log(`Vehicle Registration: ${registration}`);
+    // Only log transaction details in development mode
+    if (import.meta.env.DEV) {
+      console.group(`🔗 Transaction Details - ${method}`);
+      console.log(`Transaction ID: ${txId}`);
+      console.log(`View on Lora: ${this.getLoraUrl(txId)}`);
+      if (registration) {
+        console.log(`Vehicle Registration: ${registration}`);
+      }
+      console.log(`Timestamp: ${new Date().toISOString()}`);
+      console.groupEnd();
     }
-    console.log(`Timestamp: ${new Date().toISOString()}`);
-    console.groupEnd();
   }
 }

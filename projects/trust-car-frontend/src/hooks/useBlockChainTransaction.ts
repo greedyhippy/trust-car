@@ -107,7 +107,7 @@ export const useBlockchainTransaction = () => {
       try {
         const appClient = new IrishVehicleRegistryClient({
           appId: APP_ID,
-          sender: activeAddress!,
+          defaultSender: activeAddress!,
           algorand: algorand,
         });
 
@@ -148,7 +148,7 @@ export const useBlockchainTransaction = () => {
     return executeTransaction('Ownership Transfer', async () => {
       const appClient = new IrishVehicleRegistryClient({
         appId: APP_ID,
-        sender: activeAddress!,
+        defaultSender: activeAddress!,
         algorand: algorand,
       });
 
@@ -179,7 +179,7 @@ export const useBlockchainTransaction = () => {
     return executeTransaction('Service Record', async () => {
       const appClient = new IrishVehicleRegistryClient({
         appId: APP_ID,
-        sender: activeAddress!,
+        defaultSender: activeAddress!,
         algorand: algorand,
       });
 

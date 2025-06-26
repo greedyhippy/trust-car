@@ -1,11 +1,17 @@
 // src/components/DebugStatus.tsx
+// Development-only debug component for blockchain status monitoring
 import React, { useState, useEffect } from 'react';
 import { useWallet } from '@txnlab/use-wallet-react';
 import { getAlgodConfigFromViteEnvironment } from '../utils/network/getAlgoClientConfigs';
-import { AlgorandClient } from '@algorandfoundation/algokit-utils';
+import { AlgorandClient, algo } from '@algorandfoundation/algokit-utils';
 import { APP_ID } from '../constants';
 
 export const DebugStatus: React.FC = () => {
+  // Only render in development mode
+  if (!import.meta.env.DEV) {
+    return null;
+  }
+
   const { activeAddress, transactionSigner, wallets } = useWallet();
   const [appInfo, setAppInfo] = useState<any>(null);
   const [appError, setAppError] = useState<string | null>(null);
@@ -16,13 +22,10 @@ export const DebugStatus: React.FC = () => {
 
   const checkAppStatus = async () => {
     try {
-      console.log('Checking app status for APP_ID:', APP_ID);
       const appInfo = await algorand.client.algod.getApplicationByID(APP_ID).do();
       setAppInfo(appInfo);
       setAppError(null);
-      console.log('App found:', appInfo);
     } catch (error) {
-      console.error('App check failed:', error);
       setAppError(error instanceof Error ? error.message : 'App not found');
       setAppInfo(null);
     }
@@ -34,9 +37,11 @@ export const DebugStatus: React.FC = () => {
     try {
       const accountInfo = await algorand.client.algod.accountInformation(activeAddress).do();
       setAccountInfo(accountInfo);
-      console.log('Account info:', accountInfo);
     } catch (error) {
-      console.error('Account check failed:', error);
+      // Account check failed - could log this if needed in development
+      if (import.meta.env.DEV) {
+        console.error('Account check failed:', error);
+      }
     }
   };
 
@@ -57,18 +62,18 @@ export const DebugStatus: React.FC = () => {
     }
 
     try {
-      console.log('Testing payment...');
       const result = await algorand.send.payment({
         sender: activeAddress,
         signer: transactionSigner,
         receiver: activeAddress,
-        amount: 0
+        amount: algo(0)
       });
 
-      console.log('Payment test successful:', result);
       alert(`Payment test successful! TX: ${result.txIds[0]}`);
     } catch (error) {
-      console.error('Payment test failed:', error);
+      if (import.meta.env.DEV) {
+        console.error('Payment test failed:', error);
+      }
       alert(`Payment test failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
@@ -94,7 +99,7 @@ export const DebugStatus: React.FC = () => {
       <div style={{ marginBottom: '15px', padding: '10px', backgroundColor: '#f0f8ff', borderRadius: '4px' }}>
         <strong>👛 Wallet Status:</strong>
         <div>Active Address: {activeAddress ? `${activeAddress.slice(0, 8)}...${activeAddress.slice(-4)}` : 'Not connected'}</div>
-        <div>Signer Available: {transactionSigner ? '✅ Yes' : '❌ No'}</div>
+        <div>Signer Available: {transactionSigner !== undefined ? '✅ Yes' : '❌ No'}</div>
         <div>Available Wallets: {wallets?.length || 0}</div>
 
         {activeAddress && (
@@ -127,7 +132,7 @@ export const DebugStatus: React.FC = () => {
 
       {/* App Status */}
       <div style={{ marginBottom: '15px', padding: '10px', backgroundColor: appError ? '#ffe0e0' : '#e0ffe0', borderRadius: '4px' }}>
-        <strong>📱 Smart Contract Status (APP_ID: {APP_ID}):</strong>
+        <strong>📱 Smart Contract Status (APP_ID: {APP_ID.toString()}):</strong>
         {appError ? (
           <div style={{ color: 'red' }}>❌ {appError}</div>
         ) : appInfo ? (

@@ -41,7 +41,7 @@ export const useSimpleBlockchain = () => {
 
     try {
       // Use the IrishVehicleRegistryClient directly
-      const { IrishVehicleRegistryClient } = await import('../contracts/IrishVehicleRegistry');
+      const { IrishVehicleRegistryClient } = await import('../contracts/IrishVehicleRegistryClient');
 
       const appClient = new IrishVehicleRegistryClient({
         appId: APP_ID,
@@ -56,6 +56,23 @@ export const useSimpleBlockchain = () => {
         sender: activeAddress,
         signer: transactionSigner
       });
+
+      // Check if the contract returned an error message
+      const contractResponse = result.return?.toString() || '';
+
+      if (contractResponse.startsWith('Error:')) {
+        // Handle contract-level errors
+        const errorMessage = contractResponse.replace('Error: ', '');
+        VehicleLogger.error('Contract returned error', errorMessage);
+
+        setState(prev => ({
+          ...prev,
+          loading: false,
+          error: errorMessage
+        }));
+
+        return false;
+      }
 
       VehicleLogger.success('Vehicle registration successful', result);
 
@@ -76,7 +93,7 @@ export const useSimpleBlockchain = () => {
         result: {
           txId: result.txIds[0],
           confirmedRound: 0,
-          message: `Vehicle ${registration} registered successfully`
+          message: contractResponse || `Vehicle ${registration} registered successfully`
         }
       }));
 
@@ -113,7 +130,7 @@ export const useSimpleBlockchain = () => {
     if (!activeAddress) return false;
 
     try {
-      const { IrishVehicleRegistryClient } = await import('../contracts/IrishVehicleRegistry');
+      const { IrishVehicleRegistryClient } = await import('../contracts/IrishVehicleRegistryClient');
 
       const appClient = new IrishVehicleRegistryClient({
         appId: APP_ID,
@@ -153,7 +170,7 @@ export const useSimpleBlockchain = () => {
     VehicleLogger.blockchain('Starting ownership transfer', { registration, newOwner, activeAddress });
 
     try {
-      const { IrishVehicleRegistryClient } = await import('../contracts/IrishVehicleRegistry');
+      const { IrishVehicleRegistryClient } = await import('../contracts/IrishVehicleRegistryClient');
 
       const appClient = new IrishVehicleRegistryClient({
         appId: APP_ID,
@@ -171,6 +188,23 @@ export const useSimpleBlockchain = () => {
         sender: activeAddress,
         signer: transactionSigner
       });
+
+      // Check if the contract returned an error message
+      const contractResponse = result.return?.toString() || '';
+
+      if (contractResponse.startsWith('Error:')) {
+        // Handle contract-level errors
+        const errorMessage = contractResponse.replace('Error: ', '');
+        VehicleLogger.error('Contract returned error', errorMessage);
+
+        setState(prev => ({
+          ...prev,
+          loading: false,
+          error: errorMessage
+        }));
+
+        return false;
+      }
 
       VehicleLogger.success('Transfer ownership successful', result);
 
@@ -191,7 +225,7 @@ export const useSimpleBlockchain = () => {
         result: {
           txId: result.txIds[0],
           confirmedRound: 0,
-          message: `Ownership of ${registration} transferred to ${newOwner}`
+          message: contractResponse || `Ownership of ${registration} transferred to ${newOwner}`
         }
       }));
 
@@ -200,7 +234,22 @@ export const useSimpleBlockchain = () => {
     } catch (error) {
       VehicleLogger.error('Transfer ownership failed', error);
 
-      const errorMessage = error instanceof Error ? error.message : 'Transfer failed';
+      // Enhanced error handling for transfer operations
+      let errorMessage = 'Transfer failed';
+      if (error instanceof Error) {
+        if (error.message.includes('not found')) {
+          errorMessage = `Vehicle ${registration} not found or not registered`;
+        } else if (error.message.includes('owner')) {
+          errorMessage = 'Only the current owner can transfer ownership';
+        } else if (error.message.includes('insufficient funds')) {
+          errorMessage = 'Insufficient funds for transaction';
+        } else if (error.message.includes('rejected')) {
+          errorMessage = 'Transaction rejected by user';
+        } else {
+          errorMessage = error.message;
+        }
+      }
+
       setState(prev => ({
         ...prev,
         loading: false,
@@ -226,7 +275,7 @@ export const useSimpleBlockchain = () => {
     VehicleLogger.blockchain('Starting service record addition', { registration, serviceDetails, activeAddress });
 
     try {
-      const { IrishVehicleRegistryClient } = await import('../contracts/IrishVehicleRegistry');
+      const { IrishVehicleRegistryClient } = await import('../contracts/IrishVehicleRegistryClient');
 
       const appClient = new IrishVehicleRegistryClient({
         appId: APP_ID,
@@ -244,6 +293,23 @@ export const useSimpleBlockchain = () => {
         sender: activeAddress,
         signer: transactionSigner
       });
+
+      // Check if the contract returned an error message
+      const contractResponse = result.return?.toString() || '';
+
+      if (contractResponse.startsWith('Error:')) {
+        // Handle contract-level errors
+        const errorMessage = contractResponse.replace('Error: ', '');
+        VehicleLogger.error('Contract returned error', errorMessage);
+
+        setState(prev => ({
+          ...prev,
+          loading: false,
+          error: errorMessage
+        }));
+
+        return false;
+      }
 
       VehicleLogger.success('Service record addition successful', result);
 
@@ -264,7 +330,7 @@ export const useSimpleBlockchain = () => {
         result: {
           txId: result.txIds[0],
           confirmedRound: 0,
-          message: `Service record added for ${registration}: ${serviceDetails}`
+          message: contractResponse || `Service record added for ${registration}: ${serviceDetails}`
         }
       }));
 
@@ -273,7 +339,22 @@ export const useSimpleBlockchain = () => {
     } catch (error) {
       VehicleLogger.error('Service record addition failed', error);
 
-      const errorMessage = error instanceof Error ? error.message : 'Service record failed';
+      // Enhanced error handling for blockchain operations
+      let errorMessage = 'Service record failed';
+      if (error instanceof Error) {
+        if (error.message.includes('not found')) {
+          errorMessage = `Vehicle ${registration} not found or not registered`;
+        } else if (error.message.includes('owner')) {
+          errorMessage = 'Only the vehicle owner can add service records';
+        } else if (error.message.includes('insufficient funds')) {
+          errorMessage = 'Insufficient funds for transaction';
+        } else if (error.message.includes('rejected')) {
+          errorMessage = 'Transaction rejected by user';
+        } else {
+          errorMessage = error.message;
+        }
+      }
+
       setState(prev => ({
         ...prev,
         loading: false,
