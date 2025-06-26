@@ -10,6 +10,15 @@ export const SERVICE_TYPES = [
   { value: 'major-service', label: 'Major Service' },
 ] as const;
 
+// Vehicle condition options for maintenance services
+export const VEHICLE_CONDITIONS = [
+  { value: 'excellent', label: 'Excellent' },
+  { value: 'good', label: 'Good' },
+  { value: 'fair', label: 'Fair' },
+  { value: 'poor', label: 'Poor' },
+  { value: 'needs-attention', label: 'Needs Attention' },
+] as const;
+
 // All available vehicles in the API (for dropdown)
 export const AVAILABLE_VEHICLES = [
   { registration: '12D12345', description: 'Toyota Corolla (2012)' },

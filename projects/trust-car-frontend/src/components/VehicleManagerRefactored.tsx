@@ -8,7 +8,7 @@ import { SuccessMessage } from './common/SuccessMessage';
 import { VehicleHistory } from './VehicleHistoryNew';
 import { TransactionHistory } from './TransactionHistory';
 import ConnectWallet from './ConnectWallet';
-import { SERVICE_TYPES, AVAILABLE_VEHICLES } from '../constants';
+import { SERVICE_TYPES, AVAILABLE_VEHICLES, VEHICLE_CONDITIONS } from '../constants';
 import { BlockchainAction } from '../types/blockchain';
 import { VehicleLogger } from '../utils/logger';
 import trustCarLogo from '../assets/trustcar-logo.svg';
@@ -769,21 +769,25 @@ export const VehicleManager: React.FC = () => {
                                   }}
                                 />
 
-                                {/* Condition field for General Maintenance and Major Service */}
+                                {/* Condition dropdown for General Maintenance and Major Service */}
                                 {(serviceType === 'General Maintenance' || serviceType === 'Major Service') && (
-                                  <textarea
-                                    placeholder="Vehicle condition notes (e.g., Good, Fair, Needs attention, etc.)"
+                                  <select
                                     value={serviceCondition}
                                     onChange={(e) => setServiceCondition(e.target.value)}
                                     className="input-modern"
                                     style={{
                                       width: '100%',
                                       padding: '12px',
-                                      fontSize: '14px',
-                                      minHeight: '80px',
-                                      resize: 'vertical'
+                                      fontSize: '14px'
                                     }}
-                                  />
+                                  >
+                                    <option value="">Select vehicle condition</option>
+                                    {VEHICLE_CONDITIONS.map(condition => (
+                                      <option key={condition.value} value={condition.label}>
+                                        {condition.label}
+                                      </option>
+                                    ))}
+                                  </select>
                                 )}
                               </div>
                             )}
