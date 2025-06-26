@@ -5,7 +5,8 @@ import { useSimpleBlockchain as useBlockchainTransaction } from '../hooks/useSim
 import { LoadingSpinner } from './common/LoadingSpinner';
 import { ErrorMessage } from './common/ErrorMessage';
 import { SuccessMessage } from './common/SuccessMessage';
-import { VehicleHistory } from './VehicleHistory';
+import { VehicleHistory } from './VehicleHistoryNew';
+import { TransactionHistory } from './TransactionHistory';
 import ConnectWallet from './ConnectWallet';
 import { SERVICE_TYPES, TEST_VEHICLES } from '../constants';
 import { BlockchainAction } from '../types/blockchain';
@@ -262,12 +263,14 @@ export const VehicleManager: React.FC = () => {
                   transition: 'all 0.3s ease'
                 }}
                 onMouseEnter={(e) => {
-                  e.target.style.background = 'linear-gradient(145deg, #d32f2f, #c62828)';
-                  e.target.style.transform = 'scale(1.02)';
+                  const target = e.target as HTMLButtonElement;
+                  target.style.background = 'linear-gradient(145deg, #d32f2f, #c62828)';
+                  target.style.transform = 'scale(1.02)';
                 }}
                 onMouseLeave={(e) => {
-                  e.target.style.background = 'linear-gradient(145deg, #f44336, #d32f2f)';
-                  e.target.style.transform = 'scale(1)';
+                  const target = e.target as HTMLButtonElement;
+                  target.style.background = 'linear-gradient(145deg, #f44336, #d32f2f)';
+                  target.style.transform = 'scale(1)';
                 }}
               >
                 🔄 Change Wallet
@@ -332,8 +335,14 @@ export const VehicleManager: React.FC = () => {
                       padding: '2px 4px',
                       borderRadius: '4px'
                     }}
-                    onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(33, 150, 243, 0.1)'}
-                    onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                    onMouseEnter={(e) => {
+                      const target = e.target as HTMLButtonElement;
+                      target.style.backgroundColor = 'rgba(33, 150, 243, 0.1)';
+                    }}
+                    onMouseLeave={(e) => {
+                      const target = e.target as HTMLButtonElement;
+                      target.style.backgroundColor = 'transparent';
+                    }}
                   >
                     {v.registration}
                   </button>
@@ -619,6 +628,13 @@ export const VehicleManager: React.FC = () => {
                 </div>
               )}
             </>
+          )}
+
+          {/* Transaction History */}
+          {isWalletConnected && (
+            <div className="slide-in" style={{ marginTop: '30px' }}>
+              <TransactionHistory />
+            </div>
           )}
 
           {/* Wallet Connection Modal */}

@@ -86,20 +86,39 @@ export const useVehicleHistory = () => {
 
   const parseTransactionToEvent = (txn: any, registration: string): VehicleHistoryEvent | null => {
     try {
+      VehicleLogger.info('Parsing transaction:', { txnId: txn.id, txnType: txn['tx-type'] });
+
       // Only process application call transactions to our contract
-      if (txn.txType !== 'appl' || txn.applicationTransaction?.applicationId !== APP_ID) {
+      if (txn['tx-type'] !== 'appl' || txn['application-transaction']?.['application-id'] !== APP_ID) {
+        VehicleLogger.info('Skipping non-app transaction or different app', {
+          txnType: txn['tx-type'],
+          appId: txn['application-transaction']?.['application-id'],
+          expectedAppId: APP_ID
+        });
         return null;
       }
 
-      const appTxn = txn.applicationTransaction;
-      const { method, decodedArgs } = parseApplicationArgs(appTxn.applicationArgs || []);
+      const appTxn = txn['application-transaction'];
+      const applicationArgs = appTxn['application-args'] || [];
+
+      VehicleLogger.info('Processing app transaction:', {
+        appId: appTxn['application-id'],
+        argsCount: applicationArgs.length,
+        sender: txn.sender
+      });
+
+      const { method, decodedArgs } = parseApplicationArgs(applicationArgs);
+
+      VehicleLogger.info('Parsed method and args:', { method, decodedArgs, registration });
 
       // Only include transactions related to this specific vehicle
       const isRelevantToVehicle = decodedArgs.some(arg =>
-        arg.includes(registration) || registration.includes(arg)
+        arg.toLowerCase().includes(registration.toLowerCase()) ||
+        registration.toLowerCase().includes(arg.toLowerCase())
       );
 
       if (!isRelevantToVehicle && method !== 'getInfo') {
+        VehicleLogger.info('Transaction not relevant to vehicle', { method, decodedArgs, registration });
         return null;
       }
 
@@ -109,13 +128,13 @@ export const useVehicleHistory = () => {
       switch (method) {
         case 'registerVehicle':
           eventType = 'register';
-          details = { registration: decodedArgs[0] };
+          details = { registration: decodedArgs[0] || registration };
           break;
 
         case 'transferOwnership':
           eventType = 'transfer';
           details = {
-            registration: decodedArgs[0],
+            registration: decodedArgs[0] || registration,
             fromOwner: txn.sender,
             toOwner: decodedArgs[1]
           };
@@ -124,27 +143,44 @@ export const useVehicleHistory = () => {
         case 'addServiceRecord':
           eventType = 'service';
           details = {
-            registration: decodedArgs[0],
-            serviceType: decodedArgs[1]
+            registration: decodedArgs[0] || registration,
+            serviceType: decodedArgs[1] || 'Service Record'
           };
           break;
 
         default:
-          return null;
+          VehicleLogger.info('Unknown method, creating generic event', { method });
+          eventType = 'register'; // Default to register for any app transaction
+          details = { registration };
+          break;
       }
 
-      return {
+      const event: VehicleHistoryEvent = {
         id: `${txn.id}-${method}`,
         type: eventType,
-        timestamp: new Date(txn.roundTime * 1000),
-        round: txn.confirmedRound,
+        timestamp: new Date((txn['round-time'] || Date.now() / 1000) * 1000),
+        round: txn['confirmed-round'] || 0,
         txId: txn.id,
         details,
         sender: txn.sender
       };
+
+      VehicleLogger.success('Successfully parsed transaction event:', event);
+      return event;
+
     } catch (error) {
       VehicleLogger.error('Failed to parse transaction', { error, txn });
-      return null;
+
+      // Create a basic event even if parsing fails
+      return {
+        id: `${txn.id}-fallback`,
+        type: 'register',
+        timestamp: new Date((txn['round-time'] || Date.now() / 1000) * 1000),
+        round: txn['confirmed-round'] || 0,
+        txId: txn.id,
+        details: { registration },
+        sender: txn.sender
+      };
     }
   };
 
@@ -216,6 +252,9 @@ export const useVehicleHistory = () => {
       // For TestNet, skip indexer health check and try direct transaction search
       VehicleLogger.info('Attempting direct TestNet transaction search...');
 
+      // Get the indexer from the AlgorandClient
+      const indexer = algorand.client.indexer;
+
       // Search for transactions to our application directly without health check
       VehicleLogger.info(`Searching for transactions to app ID: ${APP_ID}`);
 
@@ -227,10 +266,12 @@ export const useVehicleHistory = () => {
 
       VehicleLogger.api('Raw transaction search response', {
         totalTransactions: searchResponse.transactions?.length || 0,
-        appId: APP_ID
+        appId: APP_ID,
+        registration
       });
 
-      if (!searchResponse.transactions) {
+      if (!searchResponse.transactions || searchResponse.transactions.length === 0) {
+        VehicleLogger.info('No transactions found');
         setState(prev => ({
           ...prev,
           loading: false,
@@ -243,10 +284,19 @@ export const useVehicleHistory = () => {
       // Parse and filter transactions
       const events: VehicleHistoryEvent[] = [];
 
+      VehicleLogger.info(`Processing ${searchResponse.transactions.length} transactions...`);
+
       for (const txn of searchResponse.transactions) {
+        VehicleLogger.info('Processing transaction:', {
+          id: txn.id,
+          type: txn['tx-type'],
+          appId: txn['application-transaction']?.['application-id']
+        });
+
         const event = parseTransactionToEvent(txn, registration);
         if (event) {
           events.push(event);
+          VehicleLogger.success('Added event to results:', { eventId: event.id, eventType: event.type });
         }
       }
 

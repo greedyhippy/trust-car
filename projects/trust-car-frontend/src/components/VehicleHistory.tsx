@@ -1,8 +1,25 @@
-// src/components/VehicleHistory.tsx - Enhanced Version
-import React, { useEffect } from 'react';
-import { useVehicleHistory, VehicleHistoryEvent } from '../hooks/useVehicleHistory';
+// src/components/VehicleHistory.tsx - Enhanced Version with TransactionMonitor Integration
+import React, { useEffect, useState } from 'react';
+import { TransactionMonitor, TransactionInfo } from '../utils/transactionMonitor';
 import { LoadingSpinner } from './common/LoadingSpinner';
 import { ErrorMessage } from './common/ErrorMessage';
+
+interface VehicleHistoryProps {
+  registration: string;
+  isVisible: boolean;
+}
+
+// Convert TransactionInfo to our VehicleHistoryEvent format
+interface VehicleHistoryEvent {
+  id: string;
+  type: 'register' | 'transfer' | 'service' | 'unknown';
+  timestamp: Date;
+  txId: string;
+  details: {
+    registration?: string;
+    method?: string;
+  };
+}
 
 interface VehicleHistoryProps {
   registration: string;
