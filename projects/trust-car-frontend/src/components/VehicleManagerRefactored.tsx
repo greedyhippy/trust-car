@@ -8,7 +8,7 @@ import { SuccessMessage } from './common/SuccessMessage';
 import { VehicleHistory } from './VehicleHistoryNew';
 import { TransactionHistory } from './TransactionHistory';
 import ConnectWallet from './ConnectWallet';
-import { SERVICE_TYPES, TEST_VEHICLES } from '../constants';
+import { SERVICE_TYPES, AVAILABLE_VEHICLES } from '../constants';
 import { BlockchainAction } from '../types/blockchain';
 import { VehicleLogger } from '../utils/logger';
 
@@ -314,42 +314,56 @@ export const VehicleManager: React.FC = () => {
               </button>
             </div>
 
-            {/* Test Vehicles */}
+            {/* Vehicle Selection Dropdown */}
             <div style={{
               padding: '15px',
               backgroundColor: 'rgba(0,0,0,0.05)',
               borderRadius: '10px',
               fontSize: '14px'
             }}>
-              <strong style={{ color: '#666' }}>Test vehicles: </strong>
-              {TEST_VEHICLES.map((v, i) => (
-                <span key={v.registration}>
-                  <button
-                    onClick={() => setRegistration(v.registration)}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      color: '#2196F3',
-                      cursor: 'pointer',
-                      textDecoration: 'underline',
-                      padding: '2px 4px',
-                      borderRadius: '4px'
-                    }}
-                    onMouseEnter={(e) => {
-                      const target = e.target as HTMLButtonElement;
-                      target.style.backgroundColor = 'rgba(33, 150, 243, 0.1)';
-                    }}
-                    onMouseLeave={(e) => {
-                      const target = e.target as HTMLButtonElement;
-                      target.style.backgroundColor = 'transparent';
-                    }}
-                  >
-                    {v.registration}
-                  </button>
-                  <span style={{ color: '#666' }}> ({v.description})</span>
-                  {i < TEST_VEHICLES.length - 1 && ', '}
-                </span>
-              ))}
+              <strong style={{ color: '#666', display: 'block', marginBottom: '10px' }}>
+                Select from available vehicles ({AVAILABLE_VEHICLES.length} total):
+              </strong>
+              <select
+                value=""
+                onChange={(e) => {
+                  if (e.target.value) {
+                    setRegistration(e.target.value);
+                  }
+                }}
+                style={{
+                  width: '100%',
+                  padding: '10px 12px',
+                  borderRadius: '6px',
+                  border: '1px solid #ddd',
+                  fontSize: '14px',
+                  backgroundColor: 'white',
+                  cursor: 'pointer',
+                  transition: 'border-color 0.2s',
+                  outline: 'none'
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = '#2196F3';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = '#ddd';
+                }}
+              >
+                <option value="" disabled>-- Choose a vehicle to lookup --</option>
+                {AVAILABLE_VEHICLES.map((vehicle) => (
+                  <option key={vehicle.registration} value={vehicle.registration}>
+                    {vehicle.registration} - {vehicle.description}
+                  </option>
+                ))}
+              </select>
+              <div style={{
+                marginTop: '8px',
+                fontSize: '12px',
+                color: '#888',
+                fontStyle: 'italic'
+              }}>
+                💡 These are demo vehicles available in the test API
+              </div>
             </div>
 
             {searchError && <ErrorMessage message={searchError} />}
