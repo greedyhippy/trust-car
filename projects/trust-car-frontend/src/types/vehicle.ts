@@ -12,6 +12,9 @@ export interface VehicleData {
     name?: string;
     address?: string;
   };
+  // Image properties from API
+  imageUrl?: string;
+  thumbnailUrl?: string;
 }
 
 export interface VehicleApiResponse {

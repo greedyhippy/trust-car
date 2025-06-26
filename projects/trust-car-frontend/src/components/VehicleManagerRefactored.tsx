@@ -107,24 +107,6 @@ export const VehicleManager: React.FC = () => {
           background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
           min-height: 100vh;
         }
-        .license-plate {
-          background: linear-gradient(145deg, #FFE135 0%, #F5D500 100%);
-          border: 3px solid #333;
-          border-radius: 8px;
-          padding: 8px 16px;
-          font-family: 'Courier New', monospace;
-          font-weight: bold;
-          font-size: 24px;
-          color: #333;
-          display: inline-flex;
-          align-items: center;
-          box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-          position: relative;
-        }
-        .license-plate::before {
-          content: '🇮🇪';
-          margin-right: 8px;
-        }
         .btn-modern {
           background: linear-gradient(145deg, #4CAF50, #45a049);
           border: none;
@@ -295,23 +277,93 @@ export const VehicleManager: React.FC = () => {
               🔍 Search Vehicle
             </h2>
 
-            <div style={{ display: 'flex', gap: '15px', marginBottom: '20px' }}>
-              <input
-                type="text"
-                placeholder="Enter registration (e.g., 21G99999)"
-                value={registration}
-                onChange={(e) => setRegistration(e.target.value.toUpperCase())}
-                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                className="input-modern"
-                style={{ flex: 1 }}
-              />
+            <div style={{ display: 'flex', gap: '15px', marginBottom: '20px', alignItems: 'center', justifyContent: 'center' }}>
+              {/* European Style Irish License Plate Styled Search Bar */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                backgroundColor: '#ffffff',
+                border: '3px solid #000000',
+                borderRadius: '8px',
+                padding: '0',
+                fontFamily: 'monospace, "Courier New"',
+                fontWeight: 'bold',
+                fontSize: '20px',
+                boxShadow: '0 4px 8px rgba(0,0,0,0.2), inset 0 2px 4px rgba(0,0,0,0.1)',
+                height: '60px',
+                minWidth: '280px',
+                maxWidth: '320px',
+                overflow: 'hidden',
+                position: 'relative'
+              }}>
+                {/* EU Stars Strip */}
+                <div style={{
+                  backgroundColor: '#003f7f',
+                  color: '#ffcc00',
+                  width: '45px',
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '12px',
+                  fontWeight: 'bold',
+                  borderRight: '2px solid #000000'
+                }}>
+                  <div style={{ marginBottom: '2px' }}>★</div>
+                  <div style={{ fontSize: '8px', letterSpacing: '0.5px' }}>IRL</div>
+                  <div style={{ marginTop: '2px' }}>★</div>
+                </div>
+
+                {/* License Plate Input */}
+                <input
+                  type="text"
+                  placeholder="21G99999"
+                  value={registration}
+                  onChange={(e) => setRegistration(e.target.value.toUpperCase())}
+                  onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                  style={{
+                    flex: 1,
+                    border: 'none',
+                    outline: 'none',
+                    backgroundColor: 'transparent',
+                    color: '#000000',
+                    fontSize: '20px',
+                    fontFamily: 'monospace, "Courier New"',
+                    fontWeight: 'bold',
+                    textAlign: 'center',
+                    letterSpacing: '2px',
+                    padding: '0 15px',
+                    height: '100%'
+                  }}
+                  maxLength={8}
+                />
+              </div>
+
               <button
                 className="btn-modern"
                 onClick={handleSearch}
                 disabled={!registration.trim() || searchLoading}
+                style={{
+                  height: '60px',
+                  padding: '0 25px',
+                  fontSize: '16px',
+                  fontWeight: 'bold'
+                }}
               >
-                {searchLoading ? 'Searching...' : 'Search'}
+                {searchLoading ? '🔍 Searching...' : '🔍 Search'}
               </button>
+            </div>
+
+            {/* Plate Helper Text */}
+            <div style={{
+              textAlign: 'center',
+              marginBottom: '15px',
+              fontSize: '12px',
+              color: '#666',
+              fontStyle: 'italic'
+            }}>
+              📋 Enter Irish registration number (e.g., 21G99999, 12D12345)
             </div>
 
             {/* Vehicle Selection Dropdown */}
@@ -417,12 +469,112 @@ export const VehicleManager: React.FC = () => {
                       🚗 Vehicle Details
                     </h3>
 
-                    {/* License Plate Style Registration */}
+                    {/* European Style License Plate Display */}
                     <div style={{ marginBottom: '30px', textAlign: 'center' }}>
-                      <div className="license-plate">
-                        {vehicleData.registration}
+                      <div style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        backgroundColor: '#ffffff',
+                        border: '3px solid #000000',
+                        borderRadius: '8px',
+                        padding: '0',
+                        fontFamily: 'monospace, "Courier New"',
+                        fontWeight: 'bold',
+                        fontSize: '18px',
+                        boxShadow: '0 4px 8px rgba(0,0,0,0.2), inset 0 2px 4px rgba(0,0,0,0.1)',
+                        height: '50px',
+                        minWidth: '240px',
+                        overflow: 'hidden'
+                      }}>
+                        {/* EU Stars Strip */}
+                        <div style={{
+                          backgroundColor: '#003f7f',
+                          color: '#ffcc00',
+                          width: '35px',
+                          height: '100%',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '8px',
+                          fontWeight: 'bold',
+                          borderRight: '2px solid #000000'
+                        }}>
+                          <div style={{ marginBottom: '1px' }}>★</div>
+                          <div style={{ fontSize: '6px', letterSpacing: '0.5px' }}>IRL</div>
+                          <div style={{ marginTop: '1px' }}>★</div>
+                        </div>
+
+                        {/* Registration Number */}
+                        <div style={{
+                          flex: 1,
+                          color: '#000000',
+                          fontSize: '18px',
+                          fontFamily: 'monospace, "Courier New"',
+                          fontWeight: 'bold',
+                          textAlign: 'center',
+                          letterSpacing: '1.5px',
+                          padding: '0 15px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}>
+                          {vehicleData.registration}
+                        </div>
                       </div>
                     </div>
+
+                    {/* Vehicle Image */}
+                    {vehicleData.imageUrl && (
+                      <div style={{
+                        marginBottom: '30px',
+                        textAlign: 'center',
+                        borderRadius: '15px',
+                        overflow: 'hidden',
+                        boxShadow: '0 8px 20px rgba(0,0,0,0.15)',
+                        backgroundColor: '#f5f5f5'
+                      }}>
+                        <img
+                          src={vehicleData.imageUrl}
+                          alt={`${vehicleData.make} ${vehicleData.model} (${vehicleData.year})`}
+                          style={{
+                            width: '100%',
+                            maxWidth: '400px',
+                            height: '250px',
+                            objectFit: 'cover',
+                            borderRadius: '12px',
+                            transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+                            cursor: 'pointer'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = 'scale(1.02)';
+                            e.currentTarget.style.boxShadow = '0 12px 25px rgba(0,0,0,0.2)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = 'scale(1)';
+                            e.currentTarget.style.boxShadow = 'none';
+                          }}
+                          onError={(e) => {
+                            // Show fallback if image fails to load
+                            const target = e.currentTarget;
+                            target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjI1MCIgdmlld0JveD0iMCAwIDQwMCAyNTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMjUwIiBmaWxsPSIjRjVGNUY1Ii8+CjxwYXRoIGQ9Ik0yMDAgMTI1SDE2MFYxNjVIMjAwVjEyNVoiIGZpbGw9IiNEREREREQiLz4KPHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIwIDMwSDEwVjEwSDMwVjMwSDIwWiIgZmlsbD0iI0RERERERCIvPgo8L3N2Zz4K';
+                            target.alt = 'Vehicle image not available';
+                          }}
+                          onClick={() => {
+                            // Open full size image in new tab
+                            window.open(vehicleData.imageUrl, '_blank');
+                          }}
+                        />
+                        <div style={{
+                          marginTop: '10px',
+                          fontSize: '12px',
+                          color: '#666',
+                          fontStyle: 'italic'
+                        }}>
+                          📷 {vehicleData.make} {vehicleData.model} ({vehicleData.year}) • Click to view full size
+                        </div>
+                      </div>
+                    )}
 
                     {/* Vehicle Info Table */}
                     <div style={{ display: 'grid', gap: '15px' }}>
