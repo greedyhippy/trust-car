@@ -1,4 +1,4 @@
-// src/components/VehicleManagerComplete.tsx
+// src/components/VehicleManagerRefactored.tsx
 import React, { useState } from 'react';
 import { useVehicleSearch } from '../hooks/useVehicleSearch';
 import { useSimpleBlockchain as useBlockchainTransaction } from '../hooks/useSimpleBlockchain';
@@ -76,341 +76,558 @@ export const VehicleManager: React.FC = () => {
   };
 
   return (
-    <div className="vehicle-manager" style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
-      <h1 style={{ textAlign: 'center', marginBottom: '30px' }}>
-        Irish Vehicle Registry - Blockchain Manager
-      </h1>
+    <>
+      <style>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideIn {
+          from { transform: translateX(-20px); opacity: 0; }
+          to { transform: translateX(0); opacity: 1; }
+        }
+        .fade-in {
+          animation: fadeIn 0.6s ease-out;
+        }
+        .slide-in {
+          animation: slideIn 0.4s ease-out;
+        }
+        .glass-card {
+          background: rgba(255, 255, 255, 0.9);
+          backdrop-filter: blur(10px);
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        .gradient-bg {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          min-height: 100vh;
+        }
+        .license-plate {
+          background: linear-gradient(145deg, #FFE135 0%, #F5D500 100%);
+          border: 3px solid #333;
+          border-radius: 8px;
+          padding: 8px 16px;
+          font-family: 'Courier New', monospace;
+          font-weight: bold;
+          font-size: 24px;
+          color: #333;
+          display: inline-flex;
+          align-items: center;
+          box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+          position: relative;
+        }
+        .license-plate::before {
+          content: '🇮🇪';
+          margin-right: 8px;
+        }
+        .btn-modern {
+          background: linear-gradient(145deg, #4CAF50, #45a049);
+          border: none;
+          color: white;
+          padding: 12px 24px;
+          border-radius: 12px;
+          cursor: pointer;
+          font-weight: 600;
+          transition: all 0.3s ease;
+          box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+        .btn-modern:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+        }
+        .btn-modern:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+          transform: none;
+          box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+        .btn-action {
+          background: linear-gradient(145deg, #2196F3, #1976D2);
+          border: none;
+          color: white;
+          padding: 10px 20px;
+          border-radius: 8px;
+          cursor: pointer;
+          font-weight: 500;
+          transition: all 0.3s ease;
+        }
+        .btn-action:hover {
+          background: linear-gradient(145deg, #1976D2, #1565C0);
+          transform: scale(1.02);
+        }
+        .btn-action:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+          transform: none;
+        }
+        .btn-action.active {
+          background: linear-gradient(145deg, #FF9800, #F57C00);
+          box-shadow: 0 4px 15px rgba(255, 152, 0, 0.3);
+        }
+        .input-modern {
+          padding: 15px;
+          font-size: 16px;
+          border: 2px solid #e0e0e0;
+          border-radius: 12px;
+          outline: none;
+          transition: border-color 0.3s ease;
+          background: rgba(255, 255, 255, 0.9);
+        }
+        .input-modern:focus {
+          border-color: #2196F3;
+          box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+        }
+        @media (max-width: 768px) {
+          .grid-responsive {
+            grid-template-columns: 1fr !important;
+          }
+        }
+      `}</style>
 
-      {/* Wallet Connection Button */}
-      {!isWalletConnected && (
-        <div style={{
-          textAlign: 'center',
-          marginBottom: '20px',
-          padding: '15px',
-          backgroundColor: '#e3f2fd',
-          borderRadius: '8px',
-          border: '1px solid #1976d2'
-        }}>
-          <p style={{ marginBottom: '10px', color: '#1976d2', fontWeight: 'bold' }}>
-            🔗 Connect your TestNet wallet to get started
-          </p>
-          <button
-            onClick={() => setOpenWalletModal(true)}
-            style={{
-              padding: '10px 20px',
-              fontSize: '16px',
-              backgroundColor: '#1976d2',
+      <div className="gradient-bg" style={{ padding: '20px', minHeight: '100vh' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          {/* Header */}
+          <div className="fade-in" style={{ textAlign: 'center', marginBottom: '40px' }}>
+            <h1 style={{
               color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              fontWeight: 'bold'
-            }}
-          >
-            Connect Wallet
-          </button>
-        </div>
-      )}
-
-      {/* Wallet Status */}
-      {isWalletConnected && (
-        <div style={{
-          textAlign: 'center',
-          marginBottom: '20px',
-          padding: '10px',
-          backgroundColor: '#c8e6c9',
-          borderRadius: '8px',
-          border: '1px solid #4CAF50'
-        }}>
-          <p style={{ margin: 0, color: '#2e7d32', fontWeight: 'bold' }}>
-            ✅ Wallet Connected: {walletAddress?.slice(0, 8)}...{walletAddress?.slice(-6)}
-          </p>
-        </div>
-      )}
-
-      {/* Search Section */}
-      <section style={{ backgroundColor: 'white', padding: '20px', borderRadius: '8px', marginBottom: '20px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
-        <h2>Search Vehicle</h2>
-        <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
-          <input
-            type="text"
-            placeholder="Enter registration (e.g., 21G99999)"
-            value={registration}
-            onChange={(e) => setRegistration(e.target.value.toUpperCase())}
-            onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-            style={{
-              flex: 1,
-              padding: '10px',
-              fontSize: '16px',
-              border: '1px solid #ddd',
-              borderRadius: '4px'
-            }}
-          />
-          <button
-            onClick={handleSearch}
-            disabled={!registration.trim() || searchLoading}
-            style={{
-              padding: '10px 20px',
-              fontSize: '16px',
-              backgroundColor: '#4CAF50',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: !registration.trim() || searchLoading ? 'not-allowed' : 'pointer',
-              opacity: !registration.trim() || searchLoading ? 0.6 : 1
-            }}
-          >
-            {searchLoading ? 'Searching...' : 'Search'}
-          </button>
-        </div>
-
-        {/* Test Vehicles */}
-        <div style={{ fontSize: '12px', color: '#666' }}>
-          <strong>Test vehicles:</strong> {TEST_VEHICLES.map((v, i) => (
-            <span key={v.registration}>
-              <button
-                onClick={() => setRegistration(v.registration)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: '#1976d2',
-                  cursor: 'pointer',
-                  textDecoration: 'underline'
-                }}
-              >
-                {v.registration}
-              </button>
-              {` (${v.description})`}
-              {i < TEST_VEHICLES.length - 1 && ', '}
-            </span>
-          ))}
-        </div>
-
-        {searchError && <ErrorMessage message={searchError} />}
-      </section>
-
-      {/* Loading State */}
-      {searchLoading && <LoadingSpinner message="Searching for vehicle..." />}
-
-      {/* Vehicle Details & Actions */}
-      {vehicleData && !searchLoading && (
-        <>
-          {/* Tab Navigation */}
-          <div style={{
-            display: 'flex',
-            gap: '8px',
-            marginBottom: '20px'
-          }}>
-            <button
-              onClick={() => setShowHistory(false)}
-              style={{
-                padding: '10px 20px',
-                backgroundColor: !showHistory ? '#1976d2' : '#e0e0e0',
-                color: !showHistory ? 'white' : 'black',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                fontWeight: !showHistory ? 'bold' : 'normal'
-              }}
-            >
-              📄 Vehicle Details
-            </button>
-            <button
-              onClick={() => setShowHistory(true)}
-              style={{
-                padding: '10px 20px',
-                backgroundColor: showHistory ? '#1976d2' : '#e0e0e0',
-                color: showHistory ? 'white' : 'black',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                fontWeight: showHistory ? 'bold' : 'normal'
-              }}
-            >
-              📜 Transaction History
-            </button>
+              fontSize: '2.5rem',
+              fontWeight: 'bold',
+              textShadow: '0 2px 4px rgba(0,0,0,0.3)',
+              marginBottom: '10px'
+            }}>
+              🚗 Irish Vehicle Registry
+            </h1>
+            <p style={{
+              color: 'rgba(255,255,255,0.9)',
+              fontSize: '1.2rem',
+              textShadow: '0 1px 2px rgba(0,0,0,0.3)'
+            }}>
+              Blockchain-Powered Vehicle Management System
+            </p>
           </div>
 
-          {!showHistory ? (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-              {/* Vehicle Info Card */}
-              <section style={{
-                backgroundColor: 'white',
-                padding: '20px',
-                borderRadius: '8px',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-              }}>
-                <h3>Vehicle Details</h3>
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                  <tbody>
-                    {[
-                      { label: 'Registration', value: vehicleData.registration },
-                      { label: 'VIN', value: vehicleData.vin },
-                      { label: 'Make/Model', value: `${vehicleData.make} ${vehicleData.model}` },
-                      { label: 'Year', value: vehicleData.year },
-                      { label: 'Color', value: vehicleData.color || 'N/A' },
-                      { label: 'Fuel Type', value: vehicleData.fuelType },
-                      { label: 'Engine Size', value: vehicleData.engineSize },
-                    ].map(({ label, value }) => (
-                      <tr key={label} style={{ borderBottom: '1px solid #eee' }}>
-                        <td style={{ padding: '10px', fontWeight: 'bold' }}>{label}:</td>
-                        <td style={{ padding: '10px' }}>{value}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </section>
-
-              {/* Blockchain Actions Card */}
-              <section style={{
-                backgroundColor: 'white',
-                padding: '20px',
-                borderRadius: '8px',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-              }}>
-                <h3>Blockchain Actions</h3>
-
-                {!isWalletConnected ? (
-                  <ErrorMessage message="Please connect your wallet to perform blockchain actions" />
-                ) : (
-                  <>
-                    <p style={{ fontSize: '14px', color: '#666', marginBottom: '15px' }}>
-                      Wallet: {walletAddress?.slice(0, 6)}...{walletAddress?.slice(-4)}
-                    </p>
-
-                    {/* Action Buttons */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '15px' }}>
-                      {(['register', 'transfer', 'service'] as const).map((action) => (
-                        <button
-                          key={action}
-                          onClick={() => setActiveAction(action)}
-                          disabled={txLoading}
-                          style={{
-                            padding: '10px',
-                            backgroundColor: activeAction === action ? '#1976d2' : '#e0e0e0',
-                            color: activeAction === action ? 'white' : 'black',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: txLoading ? 'not-allowed' : 'pointer',
-                            textTransform: 'capitalize',
-                            ...(action === 'service' && { gridColumn: 'span 2' })
-                          }}
-                        >
-                          {action === 'register' && 'Register Vehicle'}
-                          {action === 'transfer' && 'Transfer Ownership'}
-                          {action === 'service' && 'Add Service Record'}
-                        </button>
-                      ))}
-                    </div>
-
-                    {/* Action Forms */}
-                    {activeAction && !txLoading && (
-                      <div style={{ backgroundColor: '#f5f5f5', padding: '15px', borderRadius: '4px', marginBottom: '15px' }}>
-                        {activeAction === 'register' && (
-                          <div>
-                            <h4>Register Vehicle</h4>
-                            <p>This will permanently record {vehicleData.registration} on the Algorand blockchain.</p>
-                          </div>
-                        )}
-
-                        {activeAction === 'transfer' && (
-                          <div>
-                            <h4>Transfer Ownership</h4>
-                            <input
-                              type="text"
-                              placeholder="New owner address (e.g., KHXEW77SJC...)"
-                              value={newOwner}
-                              onChange={(e) => setNewOwner(e.target.value)}
-                              style={{
-                                width: '100%',
-                                padding: '8px',
-                                marginBottom: '10px',
-                                border: '1px solid #ddd',
-                                borderRadius: '4px'
-                              }}
-                            />
-                          </div>
-                        )}
-
-                        {activeAction === 'service' && (
-                          <div>
-                            <h4>Add Service Record</h4>
-                            <select
-                              value={serviceType}
-                              onChange={(e) => setServiceType(e.target.value)}
-                              style={{
-                                width: '100%',
-                                padding: '8px',
-                                marginBottom: '10px',
-                                border: '1px solid #ddd',
-                                borderRadius: '4px'
-                              }}
-                            >
-                              <option value="">Select service type</option>
-                              {SERVICE_TYPES.map(type => (
-                                <option key={type.value} value={type.label}>
-                                  {type.label}
-                                </option>
-                              ))}
-                            </select>
-                            <input
-                              type="number"
-                              placeholder="Mileage (km)"
-                              value={serviceMileage}
-                              onChange={(e) => setServiceMileage(e.target.value)}
-                              style={{
-                                width: '100%',
-                                padding: '8px',
-                                border: '1px solid #ddd',
-                                borderRadius: '4px'
-                              }}
-                            />
-                          </div>
-                        )}
-
-                        <button
-                          onClick={handleExecuteAction}
-                          disabled={txLoading}
-                          style={{
-                            width: '100%',
-                            padding: '10px',
-                            backgroundColor: '#4CAF50',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                            marginTop: '10px'
-                          }}
-                        >
-                          Execute {activeAction}
-                        </button>
-                      </div>
-                    )}
-
-                    {/* Loading State */}
-                    {txLoading && <LoadingSpinner size="small" message="Processing transaction..." />}
-
-                    {/* Transaction Results */}
-                    {txError && <ErrorMessage message={txError} />}
-                    {txResult && <SuccessMessage message="Transaction successful!" txId={txResult.txId} />}
-                  </>
-                )}
-              </section>
+          {/* Wallet Status */}
+          {!isWalletConnected ? (
+            <div className="glass-card slide-in" style={{
+              textAlign: 'center',
+              marginBottom: '30px',
+              padding: '20px',
+              borderRadius: '16px'
+            }}>
+              <div style={{ marginBottom: '15px' }}>
+                <span style={{ fontSize: '2rem', marginRight: '10px' }}>🔗</span>
+                <span style={{ fontSize: '1.1rem', fontWeight: '600', color: '#333' }}>
+                  Connect your TestNet wallet to get started
+                </span>
+              </div>
+              <button
+                className="btn-modern"
+                onClick={() => setOpenWalletModal(true)}
+              >
+                Connect Wallet
+              </button>
             </div>
           ) : (
-            <VehicleHistory
-              registration={vehicleData.registration}
-              isVisible={showHistory}
-            />
+            <div className="glass-card slide-in" style={{
+              textAlign: 'center',
+              marginBottom: '30px',
+              padding: '15px',
+              borderRadius: '16px',
+              border: '2px solid #4CAF50',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <span style={{ fontSize: '1.5rem', marginRight: '10px' }}>✅</span>
+                <span style={{ fontWeight: '600', color: '#2e7d32' }}>
+                  Wallet Connected: {walletAddress?.slice(0, 8)}...{walletAddress?.slice(-6)}
+                </span>
+              </div>
+              <button
+                onClick={() => setOpenWalletModal(true)}
+                style={{
+                  background: 'linear-gradient(145deg, #f44336, #d32f2f)',
+                  border: 'none',
+                  color: 'white',
+                  padding: '8px 16px',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.background = 'linear-gradient(145deg, #d32f2f, #c62828)';
+                  e.target.style.transform = 'scale(1.02)';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.background = 'linear-gradient(145deg, #f44336, #d32f2f)';
+                  e.target.style.transform = 'scale(1)';
+                }}
+              >
+                🔄 Change Wallet
+              </button>
+            </div>
           )}
-        </>
-      )}
 
-      {/* Wallet Connection Modal */}
-      <ConnectWallet
-        openModal={openWalletModal}
-        closeModal={() => setOpenWalletModal(false)}
-      />
-    </div>
+          {/* Search Section */}
+          <div className="glass-card fade-in" style={{
+            padding: '30px',
+            borderRadius: '20px',
+            marginBottom: '30px'
+          }}>
+            <h2 style={{
+              fontSize: '1.8rem',
+              marginBottom: '20px',
+              color: '#333',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px'
+            }}>
+              🔍 Search Vehicle
+            </h2>
+
+            <div style={{ display: 'flex', gap: '15px', marginBottom: '20px' }}>
+              <input
+                type="text"
+                placeholder="Enter registration (e.g., 21G99999)"
+                value={registration}
+                onChange={(e) => setRegistration(e.target.value.toUpperCase())}
+                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                className="input-modern"
+                style={{ flex: 1 }}
+              />
+              <button
+                className="btn-modern"
+                onClick={handleSearch}
+                disabled={!registration.trim() || searchLoading}
+              >
+                {searchLoading ? 'Searching...' : 'Search'}
+              </button>
+            </div>
+
+            {/* Test Vehicles */}
+            <div style={{
+              padding: '15px',
+              backgroundColor: 'rgba(0,0,0,0.05)',
+              borderRadius: '10px',
+              fontSize: '14px'
+            }}>
+              <strong style={{ color: '#666' }}>Test vehicles: </strong>
+              {TEST_VEHICLES.map((v, i) => (
+                <span key={v.registration}>
+                  <button
+                    onClick={() => setRegistration(v.registration)}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: '#2196F3',
+                      cursor: 'pointer',
+                      textDecoration: 'underline',
+                      padding: '2px 4px',
+                      borderRadius: '4px'
+                    }}
+                    onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(33, 150, 243, 0.1)'}
+                    onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                  >
+                    {v.registration}
+                  </button>
+                  <span style={{ color: '#666' }}> ({v.description})</span>
+                  {i < TEST_VEHICLES.length - 1 && ', '}
+                </span>
+              ))}
+            </div>
+
+            {searchError && <ErrorMessage message={searchError} />}
+          </div>
+
+          {/* Loading State */}
+          {searchLoading && <LoadingSpinner message="Searching for vehicle..." />}
+
+          {/* Vehicle Details & Actions */}
+          {vehicleData && !searchLoading && (
+            <>
+              {/* Tab Navigation */}
+              <div className="fade-in" style={{
+                display: 'flex',
+                gap: '10px',
+                marginBottom: '30px'
+              }}>
+                <button
+                  className={`btn-action ${!showHistory ? 'active' : ''}`}
+                  onClick={() => setShowHistory(false)}
+                >
+                  📄 Vehicle Details
+                </button>
+                <button
+                  className={`btn-action ${showHistory ? 'active' : ''}`}
+                  onClick={() => setShowHistory(true)}
+                >
+                  📜 Transaction History
+                </button>
+              </div>
+
+              {!showHistory ? (
+                <div className="fade-in grid-responsive" style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: '30px'
+                }}>
+                  {/* Vehicle Info Card */}
+                  <div className="glass-card" style={{
+                    padding: '30px',
+                    borderRadius: '20px'
+                  }}>
+                    <h3 style={{
+                      fontSize: '1.6rem',
+                      marginBottom: '25px',
+                      color: '#333',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '10px'
+                    }}>
+                      🚗 Vehicle Details
+                    </h3>
+
+                    {/* License Plate Style Registration */}
+                    <div style={{ marginBottom: '30px', textAlign: 'center' }}>
+                      <div className="license-plate">
+                        {vehicleData.registration}
+                      </div>
+                    </div>
+
+                    {/* Vehicle Info Table */}
+                    <div style={{ display: 'grid', gap: '15px' }}>
+                      {[
+                        { label: 'VIN', value: vehicleData.vin, icon: '🔢' },
+                        { label: 'Make/Model', value: `${vehicleData.make} ${vehicleData.model}`, icon: '🏭' },
+                        { label: 'Year', value: vehicleData.year, icon: '📅' },
+                        { label: 'Color', value: vehicleData.color || 'N/A', icon: '🎨' },
+                        { label: 'Fuel Type', value: vehicleData.fuelType, icon: '⚡' },
+                        { label: 'Engine Size', value: vehicleData.engineSize, icon: '🔧' },
+                      ].map(({ label, value, icon }) => (
+                        <div key={label} style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          padding: '12px',
+                          backgroundColor: 'rgba(0,0,0,0.03)',
+                          borderRadius: '8px',
+                          border: '1px solid rgba(0,0,0,0.1)'
+                        }}>
+                          <span style={{ fontWeight: '600', color: '#555' }}>
+                            {icon} {label}:
+                          </span>
+                          <span style={{ color: '#333' }}>{value}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Blockchain Actions Card */}
+                  <div className="glass-card" style={{
+                    padding: '30px',
+                    borderRadius: '20px'
+                  }}>
+                    <h3 style={{
+                      fontSize: '1.6rem',
+                      marginBottom: '25px',
+                      color: '#333',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '10px'
+                    }}>
+                      ⛓️ Blockchain Actions
+                    </h3>
+
+                    {!isWalletConnected ? (
+                      <ErrorMessage message="Please connect your wallet to perform blockchain actions" />
+                    ) : (
+                      <>
+                        <div style={{
+                          padding: '15px',
+                          backgroundColor: 'rgba(33, 150, 243, 0.1)',
+                          borderRadius: '10px',
+                          marginBottom: '25px',
+                          border: '1px solid rgba(33, 150, 243, 0.2)'
+                        }}>
+                          <p style={{ margin: 0, color: '#1976D2', fontWeight: '600' }}>
+                            🔗 Wallet: {walletAddress?.slice(0, 6)}...{walletAddress?.slice(-4)}
+                          </p>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div style={{
+                          display: 'grid',
+                          gridTemplateColumns: '1fr 1fr',
+                          gap: '12px',
+                          marginBottom: '25px'
+                        }}>
+                          {[
+                            { action: 'register' as const, label: 'Register Vehicle', icon: '📝' },
+                            { action: 'transfer' as const, label: 'Transfer Ownership', icon: '🔄' },
+                          ].map(({ action, label, icon }) => (
+                            <button
+                              key={action}
+                              className={`btn-action ${activeAction === action ? 'active' : ''}`}
+                              onClick={() => setActiveAction(action)}
+                              disabled={txLoading}
+                              style={{
+                                padding: '12px',
+                                fontSize: '14px',
+                                fontWeight: '600'
+                              }}
+                            >
+                              {icon} {label}
+                            </button>
+                          ))}
+                          <button
+                            className={`btn-action ${activeAction === 'service' ? 'active' : ''}`}
+                            onClick={() => setActiveAction('service')}
+                            disabled={txLoading}
+                            style={{
+                              gridColumn: 'span 2',
+                              padding: '12px',
+                              fontSize: '14px',
+                              fontWeight: '600'
+                            }}
+                          >
+                            🔧 Add Service Record
+                          </button>
+                        </div>
+
+                        {/* Action Forms */}
+                        {activeAction && !txLoading && (
+                          <div style={{
+                            backgroundColor: 'rgba(0,0,0,0.05)',
+                            padding: '20px',
+                            borderRadius: '12px',
+                            marginBottom: '20px',
+                            border: '1px solid rgba(0,0,0,0.1)'
+                          }}>
+                            {activeAction === 'register' && (
+                              <div>
+                                <h4 style={{ color: '#333', marginBottom: '10px' }}>
+                                  📝 Register Vehicle
+                                </h4>
+                                <p style={{ color: '#666', fontSize: '14px' }}>
+                                  This will permanently record {vehicleData.registration} on the Algorand blockchain.
+                                </p>
+                              </div>
+                            )}
+
+                            {activeAction === 'transfer' && (
+                              <div>
+                                <h4 style={{ color: '#333', marginBottom: '15px' }}>
+                                  🔄 Transfer Ownership
+                                </h4>
+                                <input
+                                  type="text"
+                                  placeholder="New owner address (e.g., KHXEW77SJC...)"
+                                  value={newOwner}
+                                  onChange={(e) => setNewOwner(e.target.value)}
+                                  className="input-modern"
+                                  style={{
+                                    width: '100%',
+                                    marginBottom: '10px',
+                                    padding: '12px',
+                                    fontSize: '14px'
+                                  }}
+                                />
+                              </div>
+                            )}
+
+                            {activeAction === 'service' && (
+                              <div>
+                                <h4 style={{ color: '#333', marginBottom: '15px' }}>
+                                  🔧 Add Service Record
+                                </h4>
+                                <select
+                                  value={serviceType}
+                                  onChange={(e) => setServiceType(e.target.value)}
+                                  className="input-modern"
+                                  style={{
+                                    width: '100%',
+                                    marginBottom: '12px',
+                                    padding: '12px',
+                                    fontSize: '14px'
+                                  }}
+                                >
+                                  <option value="">Select service type</option>
+                                  {SERVICE_TYPES.map(type => (
+                                    <option key={type.value} value={type.label}>
+                                      {type.label}
+                                    </option>
+                                  ))}
+                                </select>
+                                <input
+                                  type="number"
+                                  placeholder="Mileage (km)"
+                                  value={serviceMileage}
+                                  onChange={(e) => setServiceMileage(e.target.value)}
+                                  className="input-modern"
+                                  style={{
+                                    width: '100%',
+                                    padding: '12px',
+                                    fontSize: '14px'
+                                  }}
+                                />
+                              </div>
+                            )}
+
+                            <button
+                              className="btn-modern"
+                              onClick={handleExecuteAction}
+                              disabled={txLoading}
+                              style={{
+                                width: '100%',
+                                marginTop: '15px',
+                                fontSize: '16px'
+                              }}
+                            >
+                              Execute {activeAction}
+                            </button>
+                          </div>
+                        )}
+
+                        {/* Loading State */}
+                        {txLoading && <LoadingSpinner size="small" message="Processing transaction..." />}
+
+                        {/* Transaction Results */}
+                        {txError && <ErrorMessage message={txError} />}
+                        {txResult && <SuccessMessage message="Transaction successful!" txId={txResult.txId} />}
+                      </>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="fade-in">
+                  <div className="glass-card" style={{
+                    padding: '30px',
+                    borderRadius: '20px'
+                  }}>
+                    <VehicleHistory
+                      registration={vehicleData.registration}
+                      isVisible={showHistory}
+                    />
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+
+          {/* Wallet Connection Modal */}
+          <ConnectWallet
+            openModal={openWalletModal}
+            closeModal={() => setOpenWalletModal(false)}
+          />
+        </div>
+      </div>
+    </>
   );
 };

@@ -1,4 +1,4 @@
-// src/components/VehicleHistory.tsx
+// src/components/VehicleHistory.tsx - Enhanced Version
 import React, { useEffect } from 'react';
 import { useVehicleHistory, VehicleHistoryEvent } from '../hooks/useVehicleHistory';
 import { LoadingSpinner } from './common/LoadingSpinner';
@@ -10,28 +10,42 @@ interface VehicleHistoryProps {
 }
 
 const EventIcon: React.FC<{ type: VehicleHistoryEvent['type'] }> = ({ type }) => {
-  const iconStyle = {
-    width: '24px',
-    height: '24px',
-    borderRadius: '50%',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: '12px',
-    fontWeight: 'bold',
-    color: 'white'
+  const getIconStyle = () => {
+    const baseStyle = {
+      width: '32px',
+      height: '32px',
+      borderRadius: '50%',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      fontSize: '14px',
+      fontWeight: 'bold',
+      color: 'white',
+      boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+    };
+
+    switch (type) {
+      case 'register':
+        return { ...baseStyle, background: 'linear-gradient(145deg, #4CAF50, #45a049)' };
+      case 'transfer':
+        return { ...baseStyle, background: 'linear-gradient(145deg, #2196F3, #1976D2)' };
+      case 'service':
+        return { ...baseStyle, background: 'linear-gradient(145deg, #FF9800, #F57C00)' };
+      default:
+        return { ...baseStyle, background: 'linear-gradient(145deg, #9E9E9E, #757575)' };
+    }
   };
 
-  switch (type) {
-    case 'register':
-      return <div style={{ ...iconStyle, backgroundColor: '#4CAF50' }}>R</div>;
-    case 'transfer':
-      return <div style={{ ...iconStyle, backgroundColor: '#2196F3' }}>T</div>;
-    case 'service':
-      return <div style={{ ...iconStyle, backgroundColor: '#FF9800' }}>S</div>;
-    default:
-      return <div style={{ ...iconStyle, backgroundColor: '#9E9E9E' }}>?</div>;
-  }
+  const getIcon = () => {
+    switch (type) {
+      case 'register': return '📝';
+      case 'transfer': return '🔄';
+      case 'service': return '🔧';
+      default: return '❓';
+    }
+  };
+
+  return <div style={getIconStyle()}>{getIcon()}</div>;
 };
 
 const EventDetails: React.FC<{ event: VehicleHistoryEvent }> = ({ event }) => {
@@ -43,15 +57,15 @@ const EventDetails: React.FC<{ event: VehicleHistoryEvent }> = ({ event }) => {
       case 'transfer':
         return (
           <div>
-            <div>Ownership transferred</div>
+            <div style={{ fontWeight: '600', color: '#333' }}>Ownership transferred</div>
             {event.details.fromOwner && (
-              <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
-                From: {event.details.fromOwner.slice(0, 8)}...{event.details.fromOwner.slice(-4)}
+              <div style={{ fontSize: '13px', color: '#666', marginTop: '4px' }}>
+                <span style={{ fontWeight: '500' }}>From:</span> {event.details.fromOwner.slice(0, 8)}...{event.details.fromOwner.slice(-4)}
               </div>
             )}
             {event.details.toOwner && (
-              <div style={{ fontSize: '12px', color: '#666' }}>
-                To: {event.details.toOwner.slice(0, 8)}...{event.details.toOwner.slice(-4)}
+              <div style={{ fontSize: '13px', color: '#666' }}>
+                <span style={{ fontWeight: '500' }}>To:</span> {event.details.toOwner.slice(0, 8)}...{event.details.toOwner.slice(-4)}
               </div>
             )}
           </div>
@@ -60,8 +74,8 @@ const EventDetails: React.FC<{ event: VehicleHistoryEvent }> = ({ event }) => {
       case 'service':
         return (
           <div>
-            <div>Service Record Added</div>
-            <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
+            <div style={{ fontWeight: '600', color: '#333' }}>Service Record Added</div>
+            <div style={{ fontSize: '13px', color: '#666', marginTop: '4px' }}>
               {event.details.serviceType}
             </div>
           </div>
@@ -82,39 +96,96 @@ const EventDetails: React.FC<{ event: VehicleHistoryEvent }> = ({ event }) => {
     });
   };
 
+  const getTestNetUrl = (txId: string) => {
+    // Use the correct AlgoKit explorer URL that was working before
+    return `https://lora.algokit.io/testnet/transaction/${txId}`;
+  };
+
   return (
     <div style={{
-      padding: '12px',
-      backgroundColor: '#f8f9fa',
-      borderRadius: '6px',
-      marginBottom: '8px'
-    }}>
+      padding: '16px',
+      background: 'rgba(255, 255, 255, 0.8)',
+      backdropFilter: 'blur(10px)',
+      borderRadius: '12px',
+      marginBottom: '12px',
+      border: '1px solid rgba(255, 255, 255, 0.2)',
+      boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
+      transition: 'all 0.3s ease'
+    }}
+    onMouseEnter={(e) => {
+      e.currentTarget.style.transform = 'translateY(-2px)';
+      e.currentTarget.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.15)';
+    }}
+    onMouseLeave={(e) => {
+      e.currentTarget.style.transform = 'translateY(0)';
+      e.currentTarget.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.1)';
+    }}
+    >
       <div style={{
         display: 'flex',
         alignItems: 'flex-start',
-        gap: '12px'
+        gap: '16px'
       }}>
         <EventIcon type={event.type} />
 
         <div style={{ flex: 1 }}>
-          <div style={{ fontWeight: '500', marginBottom: '4px' }}>
+          <div style={{ marginBottom: '8px' }}>
             {getEventDescription()}
           </div>
 
           <div style={{
             display: 'flex',
+            flexWrap: 'wrap',
             gap: '16px',
-            fontSize: '11px',
+            fontSize: '12px',
             color: '#666'
           }}>
-            <span>📅 {formatDate(event.timestamp)}</span>
-            <span>🔗 Round {event.round}</span>
-            <span
-              title={event.txId}
-              style={{ cursor: 'help' }}
-            >
-              📋 {event.txId.slice(0, 8)}...
-            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <span>📅</span>
+              <span>{formatDate(event.timestamp)}</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <span>🔗</span>
+              <span>Round {event.round}</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              {!event.txId.startsWith('MOCK') ? (
+                <a
+                  href={getTestNetUrl(event.txId)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    color: '#2196F3',
+                    textDecoration: 'none',
+                    padding: '2px 6px',
+                    borderRadius: '4px',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.backgroundColor = 'rgba(33, 150, 243, 0.1)';
+                    e.target.style.textDecoration = 'underline';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.backgroundColor = 'transparent';
+                    e.target.style.textDecoration = 'none';
+                  }}
+                >
+                  <span>🔍</span>
+                  <span>{event.txId.slice(0, 8)}...</span>
+                </a>
+              ) : (
+                <span
+                  title={event.txId}
+                  style={{ cursor: 'help', display: 'flex', alignItems: 'center', gap: '4px' }}
+                >
+                  <span>📋</span>
+                  <span>{event.txId.slice(0, 8)}...</span>
+                </span>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -130,43 +201,40 @@ const HistoryStats: React.FC<{ events: VehicleHistoryEvent[] }> = ({ events }) =
     services: events.filter(e => e.type === 'service').length
   };
 
+  const statItems = [
+    { label: 'Total Events', value: stats.total, color: '#667eea', icon: '📊' },
+    { label: 'Registrations', value: stats.registrations, color: '#4CAF50', icon: '📝' },
+    { label: 'Transfers', value: stats.transfers, color: '#2196F3', icon: '🔄' },
+    { label: 'Services', value: stats.services, color: '#FF9800', icon: '🔧' }
+  ];
+
   return (
     <div style={{
       display: 'grid',
-      gridTemplateColumns: 'repeat(4, 1fr)',
-      gap: '8px',
-      marginBottom: '16px',
-      padding: '12px',
-      backgroundColor: '#e3f2fd',
-      borderRadius: '6px'
+      gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
+      gap: '12px',
+      marginBottom: '24px'
     }}>
-      <div style={{ textAlign: 'center' }}>
-        <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#1976d2' }}>
-          {stats.total}
+      {statItems.map(({ label, value, color, icon }) => (
+        <div
+          key={label}
+          style={{
+            background: 'rgba(255, 255, 255, 0.8)',
+            backdropFilter: 'blur(10px)',
+            padding: '16px',
+            borderRadius: '12px',
+            textAlign: 'center',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)'
+          }}
+        >
+          <div style={{ fontSize: '24px', marginBottom: '4px' }}>{icon}</div>
+          <div style={{ fontSize: '24px', fontWeight: 'bold', color, marginBottom: '4px' }}>
+            {value}
+          </div>
+          <div style={{ fontSize: '12px', color: '#666', fontWeight: '500' }}>{label}</div>
         </div>
-        <div style={{ fontSize: '11px', color: '#666' }}>Total Events</div>
-      </div>
-
-      <div style={{ textAlign: 'center' }}>
-        <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#4CAF50' }}>
-          {stats.registrations}
-        </div>
-        <div style={{ fontSize: '11px', color: '#666' }}>Registrations</div>
-      </div>
-
-      <div style={{ textAlign: 'center' }}>
-        <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#2196F3' }}>
-          {stats.transfers}
-        </div>
-        <div style={{ fontSize: '11px', color: '#666' }}>Transfers</div>
-      </div>
-
-      <div style={{ textAlign: 'center' }}>
-        <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#FF9800' }}>
-          {stats.services}
-        </div>
-        <div style={{ fontSize: '11px', color: '#666' }}>Services</div>
-      </div>
+      ))}
     </div>
   );
 };
@@ -187,11 +255,11 @@ export const VehicleHistory: React.FC<VehicleHistoryProps> = ({
 
   useEffect(() => {
     if (isVisible && registration && isConnected) {
+      // Only fetch once when the component becomes visible
       fetchVehicleHistory(registration);
-    } else if (!isVisible) {
-      clearHistory();
     }
-  }, [isVisible, registration, isConnected, fetchVehicleHistory, clearHistory]);
+    // Don't clear history when not visible to prevent unnecessary re-fetching
+  }, [isVisible, registration, isConnected]); // Removed fetchVehicleHistory and clearHistory from dependencies
 
   if (!isVisible) {
     return null;
@@ -199,49 +267,81 @@ export const VehicleHistory: React.FC<VehicleHistoryProps> = ({
 
   if (!isConnected) {
     return (
-      <div style={{
-        backgroundColor: 'white',
-        padding: '20px',
-        borderRadius: '8px',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-        textAlign: 'center'
-      }}>
-        <h3>Transaction History</h3>
+      <div style={{ textAlign: 'center' }}>
+        <h3 style={{
+          fontSize: '1.6rem',
+          marginBottom: '20px',
+          color: '#333',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '10px'
+        }}>
+          📜 Transaction History
+        </h3>
         <ErrorMessage message="Please connect your wallet to view transaction history" />
       </div>
     );
   }
 
   return (
-    <div style={{
-      backgroundColor: 'white',
-      padding: '20px',
-      borderRadius: '8px',
-      boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-    }}>
+    <div>
       <div style={{
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: '16px'
+        marginBottom: '24px'
       }}>
-        <h3 style={{ margin: 0 }}>Transaction History</h3>
+        <h3 style={{
+          margin: 0,
+          fontSize: '1.6rem',
+          color: '#333',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px'
+        }}>
+          📜 Transaction History
+        </h3>
 
         <button
           onClick={() => fetchVehicleHistory(registration)}
           disabled={loading}
           style={{
-            padding: '6px 12px',
-            fontSize: '14px',
-            backgroundColor: '#1976d2',
-            color: 'white',
+            background: loading
+              ? 'linear-gradient(145deg, #ccc, #999)'
+              : 'linear-gradient(145deg, #2196F3, #1976D2)',
             border: 'none',
-            borderRadius: '4px',
+            color: 'white',
+            padding: '10px 16px',
+            borderRadius: '8px',
             cursor: loading ? 'not-allowed' : 'pointer',
-            opacity: loading ? 0.6 : 1
+            fontWeight: '600',
+            fontSize: '14px',
+            transition: 'all 0.3s ease',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px'
+          }}
+          onMouseEnter={(e) => {
+            if (!loading) {
+              e.target.style.transform = 'translateY(-1px)';
+              e.target.style.boxShadow = '0 4px 12px rgba(33, 150, 243, 0.3)';
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (!loading) {
+              e.target.style.transform = 'translateY(0)';
+              e.target.style.boxShadow = 'none';
+            }
           }}
         >
-          {loading ? '⟳' : '🔄'} Refresh
+          <span style={{
+            animation: loading ? 'spin 1s linear infinite' : 'none',
+            display: 'inline-block'
+          }}>
+            {loading ? '⟳' : '🔄'}
+          </span>
+          Refresh
         </button>
       </div>
 
@@ -252,12 +352,17 @@ export const VehicleHistory: React.FC<VehicleHistoryProps> = ({
       {!loading && !error && events.length === 0 && (
         <div style={{
           textAlign: 'center',
-          padding: '40px',
-          color: '#666'
+          padding: '60px 20px',
+          background: 'rgba(255, 255, 255, 0.5)',
+          backdropFilter: 'blur(10px)',
+          borderRadius: '16px',
+          border: '1px solid rgba(255, 255, 255, 0.2)'
         }}>
-          <div style={{ fontSize: '48px', marginBottom: '16px' }}>📋</div>
-          <div style={{ fontSize: '16px', marginBottom: '8px' }}>No History Found</div>
-          <div style={{ fontSize: '14px' }}>
+          <div style={{ fontSize: '64px', marginBottom: '16px', opacity: 0.7 }}>📋</div>
+          <div style={{ fontSize: '18px', marginBottom: '8px', color: '#333', fontWeight: '600' }}>
+            No History Found
+          </div>
+          <div style={{ fontSize: '14px', color: '#666' }}>
             No blockchain transactions found for {registration}
           </div>
         </div>
@@ -267,26 +372,53 @@ export const VehicleHistory: React.FC<VehicleHistoryProps> = ({
         <>
           <HistoryStats events={events} />
 
-          {/* Show localnet notice if using mock data */}
-          {events.some(e => e.txId.startsWith('MOCK')) && (
+          {/* Show network notice */}
+          {events.some(e => e.txId.startsWith('MOCK')) ? (
             <div style={{
-              backgroundColor: '#fff3cd',
-              padding: '12px',
-              borderRadius: '6px',
-              marginBottom: '16px',
-              border: '1px solid #ffeaa7'
+              background: 'rgba(255, 243, 205, 0.9)',
+              backdropFilter: 'blur(10px)',
+              padding: '16px',
+              borderRadius: '12px',
+              marginBottom: '20px',
+              border: '1px solid rgba(255, 234, 167, 0.8)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px'
             }}>
-              <strong>📋 Development Mode:</strong> Showing mock transaction data for localnet.
-              Deploy to TestNet to see real blockchain history.
+              <span style={{ fontSize: '24px' }}>⚠️</span>
+              <div>
+                <strong style={{ color: '#B45309' }}>Development Mode:</strong>
+                <span style={{ color: '#92400E', marginLeft: '8px' }}>
+                  Showing mock transaction data for localnet. Deploy to TestNet to see real blockchain history.
+                </span>
+              </div>
+            </div>
+          ) : (
+            <div style={{
+              background: 'rgba(219, 234, 254, 0.9)',
+              backdropFilter: 'blur(10px)',
+              padding: '16px',
+              borderRadius: '12px',
+              marginBottom: '20px',
+              border: '1px solid rgba(147, 197, 253, 0.8)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px'
+            }}>
+              <span style={{ fontSize: '24px' }}>🌐</span>
+              <div>
+                <strong style={{ color: '#1E40AF' }}>TestNet Mode:</strong>
+                <span style={{ color: '#1D4ED8', marginLeft: '8px' }}>
+                  Showing live TestNet transactions. Click transaction IDs to view on AlgoExplorer.
+                </span>
+              </div>
             </div>
           )}
 
           <div style={{
-            maxHeight: '400px',
+            maxHeight: '500px',
             overflowY: 'auto',
-            border: '1px solid #e0e0e0',
-            borderRadius: '6px',
-            padding: '12px'
+            padding: '4px'
           }}>
             {events.map((event) => (
               <EventDetails key={event.id} event={event} />
@@ -296,15 +428,23 @@ export const VehicleHistory: React.FC<VehicleHistoryProps> = ({
           {lastFetched && (
             <div style={{
               textAlign: 'center',
-              fontSize: '11px',
+              fontSize: '12px',
               color: '#999',
-              marginTop: '12px'
+              marginTop: '16px',
+              fontStyle: 'italic'
             }}>
               Last updated: {lastFetched.toLocaleTimeString()}
             </div>
           )}
         </>
       )}
+
+      <style>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 };
