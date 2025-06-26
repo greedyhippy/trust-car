@@ -47,7 +47,6 @@ export default function App() {
 return (
   <SnackbarProvider maxSnack={3}>
     <WalletProvider manager={walletManager}>
-
       <VehicleManager />
     </WalletProvider>
   </SnackbarProvider>

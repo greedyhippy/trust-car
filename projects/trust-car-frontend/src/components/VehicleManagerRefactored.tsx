@@ -8,7 +8,7 @@ import { SuccessMessage } from './common/SuccessMessage';
 import { VehicleHistory } from './VehicleHistoryNew';
 import { TransactionHistory } from './TransactionHistory';
 import ConnectWallet from './ConnectWallet';
-import { SERVICE_TYPES, AVAILABLE_VEHICLES, VEHICLE_CONDITIONS } from '../constants';
+import { AVAILABLE_VEHICLES, SERVICE_TYPES, VEHICLE_CONDITIONS } from '../constants';
 import { BlockchainAction } from '../types/blockchain';
 import { VehicleLogger } from '../utils/logger';
 import trustCarLogo from '../assets/trustcar-logo.svg';
@@ -20,6 +20,7 @@ export const VehicleManager: React.FC = () => {
   const [serviceType, setServiceType] = useState('');
   const [serviceMileage, setServiceMileage] = useState('');
   const [serviceCondition, setServiceCondition] = useState('');
+  const [showServiceMode, setShowServiceMode] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [openWalletModal, setOpenWalletModal] = useState(false);
 
@@ -56,31 +57,6 @@ export const VehicleManager: React.FC = () => {
         }
         success = await transferOwnership(vehicleData.registration, newOwner);
         if (success) setNewOwner('');
-        break;
-
-      case 'service':
-        if (!serviceType || !serviceMileage) {
-          return; // The validation error will be handled by the blockchain hook
-        }
-
-        // Check if this service type requires condition input
-        const requiresCondition = serviceType === 'General Maintenance' || serviceType === 'Major Service';
-        if (requiresCondition && !serviceCondition.trim()) {
-          return; // Condition is required for these service types
-        }
-
-        // Build service details with condition if applicable
-        let serviceDetails = `${serviceType} at ${serviceMileage}km`;
-        if (requiresCondition && serviceCondition.trim()) {
-          serviceDetails += ` - Condition: ${serviceCondition.trim()}`;
-        }
-
-        success = await addServiceRecord(vehicleData.registration, serviceDetails);
-        if (success) {
-          setServiceType('');
-          setServiceMileage('');
-          setServiceCondition('');
-        }
         break;
     }
 
@@ -651,48 +627,194 @@ export const VehicleManager: React.FC = () => {
                           </p>
                         </div>
 
-                        {/* Action Buttons */}
+                        {/* Mode Toggle */}
                         <div style={{
-                          display: 'grid',
-                          gridTemplateColumns: '1fr 1fr',
-                          gap: '12px',
-                          marginBottom: '25px'
+                          display: 'flex',
+                          backgroundColor: 'rgba(0,0,0,0.05)',
+                          borderRadius: '12px',
+                          padding: '4px',
+                          marginBottom: '20px'
                         }}>
-                          {[
-                            { action: 'register' as const, label: 'Register Vehicle', icon: '📝' },
-                            { action: 'transfer' as const, label: 'Transfer Ownership', icon: '🔄' },
-                          ].map(({ action, label, icon }) => (
-                            <button
-                              key={action}
-                              className={`btn-action ${activeAction === action ? 'active' : ''}`}
-                              onClick={() => setActiveAction(action)}
-                              disabled={txLoading}
-                              style={{
-                                padding: '12px',
-                                fontSize: '14px',
-                                fontWeight: '600'
-                              }}
-                            >
-                              {icon} {label}
-                            </button>
-                          ))}
                           <button
-                            className={`btn-action ${activeAction === 'service' ? 'active' : ''}`}
-                            onClick={() => setActiveAction('service')}
-                            disabled={txLoading}
+                            onClick={() => {
+                              setShowServiceMode(false);
+                              setActiveAction(null);
+                              setServiceType('');
+                              setServiceMileage('');
+                              setServiceCondition('');
+                            }}
                             style={{
-                              gridColumn: 'span 2',
+                              flex: 1,
                               padding: '12px',
-                              fontSize: '14px',
-                              fontWeight: '600'
+                              border: 'none',
+                              borderRadius: '8px',
+                              backgroundColor: !showServiceMode ? '#4CAF50' : 'transparent',
+                              color: !showServiceMode ? 'white' : '#666',
+                              fontWeight: '600',
+                              cursor: 'pointer',
+                              transition: 'all 0.3s ease'
                             }}
                           >
-                            🔧 Add Service Record
+                            🔍 Vehicle Owner
+                          </button>
+                          <button
+                            onClick={() => {
+                              setShowServiceMode(true);
+                              setActiveAction(null);
+                              setNewOwner('');
+                            }}
+                            style={{
+                              flex: 1,
+                              padding: '12px',
+                              border: 'none',
+                              borderRadius: '8px',
+                              backgroundColor: showServiceMode ? '#2196F3' : 'transparent',
+                              color: showServiceMode ? 'white' : '#666',
+                              fontWeight: '600',
+                              cursor: 'pointer',
+                              transition: 'all 0.3s ease'
+                            }}
+                          >
+                            🔧 Service Provider
                           </button>
                         </div>
 
-                        {/* Action Forms */}
-                        {activeAction && !txLoading && (
+                        {!showServiceMode ? (
+                          <>
+                            {/* Action Buttons */}
+                            <div style={{
+                              display: 'grid',
+                              gridTemplateColumns: '1fr 1fr',
+                              gap: '12px',
+                              marginBottom: '25px'
+                            }}>
+                              {[
+                                { action: 'register' as const, label: 'Register Vehicle', icon: '📝' },
+                                { action: 'transfer' as const, label: 'Transfer Ownership', icon: '🔄' },
+                              ].map(({ action, label, icon }) => (
+                                <button
+                                  key={action}
+                                  className={`btn-action ${activeAction === action ? 'active' : ''}`}
+                                  onClick={() => setActiveAction(action)}
+                                  disabled={txLoading}
+                                  style={{
+                                    padding: '12px',
+                                    fontSize: '14px',
+                                    fontWeight: '600'
+                                  }}
+                                >
+                                  {icon} {label}
+                                </button>
+                              ))}
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            {/* Service Provider Mode */}
+                            <div style={{
+                              backgroundColor: 'rgba(33, 150, 243, 0.1)',
+                              padding: '20px',
+                              borderRadius: '12px',
+                              marginBottom: '20px',
+                              border: '1px solid rgba(33, 150, 243, 0.2)'
+                            }}>
+                              <h4 style={{ color: '#2196F3', marginBottom: '15px', display: 'flex', alignItems: 'center' }}>
+                                🔧 Add Service Record
+                              </h4>
+
+                              <select
+                                value={serviceType}
+                                onChange={(e) => setServiceType(e.target.value)}
+                                className="input-modern"
+                                style={{
+                                  width: '100%',
+                                  marginBottom: '12px',
+                                  padding: '12px',
+                                  fontSize: '14px'
+                                }}
+                              >
+                                <option value="">Select service type</option>
+                                {SERVICE_TYPES.map(type => (
+                                  <option key={type.value} value={type.label}>
+                                    {type.label}
+                                  </option>
+                                ))}
+                              </select>
+
+                              <input
+                                type="number"
+                                placeholder="Mileage (km)"
+                                value={serviceMileage}
+                                onChange={(e) => setServiceMileage(e.target.value)}
+                                className="input-modern"
+                                style={{
+                                  width: '100%',
+                                  padding: '12px',
+                                  fontSize: '14px',
+                                  marginBottom: '12px'
+                                }}
+                              />
+
+                              {/* Condition dropdown for General Maintenance and Major Service */}
+                              {(serviceType === 'General Maintenance' || serviceType === 'Major Service') && (
+                                <select
+                                  value={serviceCondition}
+                                  onChange={(e) => setServiceCondition(e.target.value)}
+                                  className="input-modern"
+                                  style={{
+                                    width: '100%',
+                                    padding: '12px',
+                                    fontSize: '14px',
+                                    marginBottom: '12px'
+                                  }}
+                                >
+                                  <option value="">Select vehicle condition</option>
+                                  {VEHICLE_CONDITIONS.map(condition => (
+                                    <option key={condition.value} value={condition.label}>
+                                      {condition.label}
+                                    </option>
+                                  ))}
+                                </select>
+                              )}
+
+                              <button
+                                className="btn-modern"
+                                onClick={async () => {
+                                  if (!vehicleData || !serviceType || !serviceMileage) return;
+
+                                  // Check if this service type requires condition input
+                                  const requiresCondition = serviceType === 'General Maintenance' || serviceType === 'Major Service';
+                                  if (requiresCondition && !serviceCondition.trim()) {
+                                    return;
+                                  }
+
+                                  // Build service details with condition if applicable
+                                  let serviceDetails = `${serviceType} at ${serviceMileage}km`;
+                                  if (requiresCondition && serviceCondition.trim()) {
+                                    serviceDetails += ` - Condition: ${serviceCondition.trim()}`;
+                                  }
+
+                                  const success = await addServiceRecord(vehicleData.registration, serviceDetails);
+                                  if (success) {
+                                    setServiceType('');
+                                    setServiceMileage('');
+                                    setServiceCondition('');
+                                  }
+                                }}
+                                disabled={txLoading || !serviceType || !serviceMileage || ((serviceType === 'General Maintenance' || serviceType === 'Major Service') && !serviceCondition)}
+                                style={{
+                                  width: '100%',
+                                  backgroundColor: '#2196F3'
+                                }}
+                              >
+                                {txLoading ? 'Processing...' : 'Add Service Record'}
+                              </button>
+                            </div>
+                          </>
+                        )}
+
+                        {/* Action Forms for Vehicle Owner Mode */}
+                        {!showServiceMode && activeAction && !txLoading && (
                           <div style={{
                             backgroundColor: 'rgba(0,0,0,0.05)',
                             padding: '20px',
@@ -729,66 +851,6 @@ export const VehicleManager: React.FC = () => {
                                     fontSize: '14px'
                                   }}
                                 />
-                              </div>
-                            )}
-
-                            {activeAction === 'service' && (
-                              <div>
-                                <h4 style={{ color: '#333', marginBottom: '15px' }}>
-                                  🔧 Add Service Record
-                                </h4>
-                                <select
-                                  value={serviceType}
-                                  onChange={(e) => setServiceType(e.target.value)}
-                                  className="input-modern"
-                                  style={{
-                                    width: '100%',
-                                    marginBottom: '12px',
-                                    padding: '12px',
-                                    fontSize: '14px'
-                                  }}
-                                >
-                                  <option value="">Select service type</option>
-                                  {SERVICE_TYPES.map(type => (
-                                    <option key={type.value} value={type.label}>
-                                      {type.label}
-                                    </option>
-                                  ))}
-                                </select>
-                                <input
-                                  type="number"
-                                  placeholder="Mileage (km)"
-                                  value={serviceMileage}
-                                  onChange={(e) => setServiceMileage(e.target.value)}
-                                  className="input-modern"
-                                  style={{
-                                    width: '100%',
-                                    padding: '12px',
-                                    fontSize: '14px',
-                                    marginBottom: '12px'
-                                  }}
-                                />
-
-                                {/* Condition dropdown for General Maintenance and Major Service */}
-                                {(serviceType === 'General Maintenance' || serviceType === 'Major Service') && (
-                                  <select
-                                    value={serviceCondition}
-                                    onChange={(e) => setServiceCondition(e.target.value)}
-                                    className="input-modern"
-                                    style={{
-                                      width: '100%',
-                                      padding: '12px',
-                                      fontSize: '14px'
-                                    }}
-                                  >
-                                    <option value="">Select vehicle condition</option>
-                                    {VEHICLE_CONDITIONS.map(condition => (
-                                      <option key={condition.value} value={condition.label}>
-                                        {condition.label}
-                                      </option>
-                                    ))}
-                                  </select>
-                                )}
                               </div>
                             )}
 
