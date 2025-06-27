@@ -2,19 +2,33 @@
 
 ## Vercel Deployment Steps
 
-### 1. Project Structure
-The frontend is located in: `trust-car/projects/trust-car-frontend/`
+## ⚠️ **IMPORTANT: Monorepo Structure Issue**
+
+**Your issue**: You imported the entire `trust-car` repository, but Vercel needs to know the frontend is in `projects/trust-car-frontend/`.
 
 ### 2. Vercel Configuration
-The `vercel.json` file has been configured with:
-- Build command: `npm run build`
-- Output directory: `dist`
-- Framework: `vite`
-- SPA routing support (rewrites all routes to index.html)
+There are now TWO `vercel.json` files:
+- **Root level**: `trust-car/vercel.json` - Tells Vercel how to build from the monorepo
+- **Frontend level**: `trust-car/projects/trust-car-frontend/vercel.json` - Frontend-specific config
 
 ### 3. Deployment Steps
 
-#### Option A: Vercel CLI (Recommended)
+#### Option A: Fix Root Directory in Vercel Dashboard (EASIEST)
+1. Go to your Vercel project dashboard
+2. Click **Settings** tab
+3. Go to **General** section  
+4. Find **Root Directory** setting
+5. Change from `.` to: `projects/trust-car-frontend`
+6. Click **Save**
+7. Go to **Deployments** tab and redeploy
+
+#### Option B: Use Root-Level vercel.json (Current Setup)
+The root `vercel.json` is configured to:
+- Build from: `projects/trust-car-frontend`
+- Output to: `projects/trust-car-frontend/dist`
+- Handle SPA routing
+
+#### Option C: Vercel CLI from Root
 1. Install Vercel CLI: `npm install -g vercel`
 2. Navigate to frontend directory: `cd trust-car/projects/trust-car-frontend`
 3. Run: `vercel`

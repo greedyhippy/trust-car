@@ -1,0 +1,12 @@
+{
+  "buildCommand": "cd projects/trust-car-frontend && npm run build",
+  "outputDirectory": "projects/trust-car-frontend/dist",
+  "installCommand": "cd projects/trust-car-frontend && npm install",
+  "framework": "vite",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
