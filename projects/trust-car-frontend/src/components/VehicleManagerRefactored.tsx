@@ -12,6 +12,7 @@ import { AVAILABLE_VEHICLES, SERVICE_TYPES, VEHICLE_CONDITIONS } from '../consta
 import { BlockchainAction } from '../types/blockchain';
 import { VehicleLogger } from '../utils/logger';
 import trustCarLogo from '../assets/trustcar-logo.svg';
+import bannerImage from '../assets/jbannerimage.png';
 
 export const VehicleManager: React.FC = () => {
   const [registration, setRegistration] = useState('');
@@ -811,6 +812,57 @@ export const VehicleManager: React.FC = () => {
         .gradient-bg {
           background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #667eea 100%);
           min-height: 100vh;
+          position: relative;
+        }
+        .banner-section {
+          position: relative;
+          width: 100%;
+          height: 300px;
+          margin-bottom: 40px;
+          border-radius: 20px;
+          overflow: hidden;
+          box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+        }
+        .banner-image {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          filter: grayscale(20%) brightness(0.8) opacity(0.9);
+          transition: all 0.3s ease;
+        }
+        .banner-overlay {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: linear-gradient(135deg, rgba(102, 126, 234, 0.3) 0%, rgba(118, 75, 162, 0.4) 50%, rgba(102, 126, 234, 0.3) 100%);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-direction: column;
+          text-align: center;
+          padding: 20px;
+        }
+        .banner-content {
+          color: white;
+          text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+          animation: fadeIn 1s ease-out;
+        }
+        .banner-title {
+          font-size: 3rem;
+          font-weight: 800;
+          margin-bottom: 15px;
+          font-family: 'Playfair Display', serif;
+          letter-spacing: -1px;
+        }
+        .banner-subtitle {
+          font-size: 1.3rem;
+          font-weight: 500;
+          margin-bottom: 25px;
+          opacity: 0.95;
+          max-width: 600px;
+          line-height: 1.5;
         }
         .btn-modern {
           background: linear-gradient(145deg, #4CAF50, #45a049);
@@ -1021,55 +1073,89 @@ export const VehicleManager: React.FC = () => {
             right: 20px;
             padding: 10px 20px;
           }
+          .banner-section {
+            height: 250px;
+            margin-bottom: 30px;
+          }
+          .banner-title {
+            font-size: 2.2rem;
+          }
+          .banner-subtitle {
+            font-size: 1.1rem;
+            padding: 0 15px;
+          }
+        }
+        @media (max-width: 480px) {
+          .banner-section {
+            height: 200px;
+            margin-bottom: 25px;
+          }
+          .banner-title {
+            font-size: 1.8rem;
+            margin-bottom: 12px;
+          }
+          .banner-subtitle {
+            font-size: 1rem;
+            padding: 0 10px;
+          }
         }
       `}</style>
 
       <div className="gradient-bg" style={{ padding: '20px', minHeight: '100vh' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-          {/* Header */}
-          <div className="fade-in" style={{ textAlign: 'center', marginBottom: '40px' }}>
-            <div style={{ marginBottom: '15px' }}>
-              <img
-                src={trustCarLogo}
-                alt="TrustCar Logo"
-                style={{
-                  height: '80px',
-                  maxWidth: '400px',
-                  filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'scale(1.05)';
-                  e.currentTarget.style.filter = 'drop-shadow(0 4px 8px rgba(0,0,0,0.4))';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'scale(1)';
-                  e.currentTarget.style.filter = 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))';
-                }}
-                onClick={() => {
-                  setShowTutorial(true);
-                  setCurrentTutorialStep(0);
-                }}
-                title="Click for help and tutorial"
-              />
+          {/* Banner Section */}
+          <div className="banner-section fade-in">
+            <img
+              src={bannerImage}
+              alt="TrustCar Banner"
+              className="banner-image"
+            />
+            <div className="banner-overlay">
+              <div className="banner-content">
+                <div style={{ marginBottom: '15px' }}>
+                  <img
+                    src={trustCarLogo}
+                    alt="TrustCar Logo"
+                    style={{
+                      height: '80px',
+                      maxWidth: '400px',
+                      filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))',
+                      cursor: 'pointer',
+                      transition: 'all 0.3s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'scale(1.05)';
+                      e.currentTarget.style.filter = 'drop-shadow(0 4px 8px rgba(0,0,0,0.4))';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'scale(1)';
+                      e.currentTarget.style.filter = 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))';
+                    }}
+                    onClick={() => {
+                      setShowTutorial(true);
+                      setCurrentTutorialStep(0);
+                    }}
+                    title="Click for help and tutorial"
+                  />
+                </div>
+                <p style={{
+                  color: 'rgba(255,255,255,0.9)',
+                  fontSize: '1.2rem',
+                  textShadow: '0 1px 2px rgba(0,0,0,0.3)',
+                  marginBottom: '10px'
+                }}>
+                  Blockchain-Powered Vehicle Management System
+                </p>
+                <p style={{
+                  color: 'rgba(255,255,255,0.7)',
+                  fontSize: '0.9rem',
+                  textShadow: '0 1px 2px rgba(0,0,0,0.3)',
+                  fontStyle: 'italic'
+                }}>
+                  Built on Algorand TestNet • Immutable • Transparent • Secure
+                </p>
+              </div>
             </div>
-            <p style={{
-              color: 'rgba(255,255,255,0.9)',
-              fontSize: '1.2rem',
-              textShadow: '0 1px 2px rgba(0,0,0,0.3)',
-              marginBottom: '10px'
-            }}>
-              Blockchain-Powered Vehicle Management System
-            </p>
-            <p style={{
-              color: 'rgba(255,255,255,0.7)',
-              fontSize: '0.9rem',
-              textShadow: '0 1px 2px rgba(0,0,0,0.3)',
-              fontStyle: 'italic'
-            }}>
-              Built on Algorand TestNet • Immutable • Transparent • Secure
-            </p>
           </div>
 
           {/* Welcome Hint Banner */}
