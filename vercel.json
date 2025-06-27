@@ -1,12 +1,21 @@
 {
-  "buildCommand": "cd projects/trust-car-frontend && npm run build",
-  "outputDirectory": "projects/trust-car-frontend/dist",
-  "installCommand": "cd projects/trust-car-frontend && npm install",
-  "framework": "vite",
-  "rewrites": [
+  "version": 2,
+  "builds": [
     {
-      "source": "/(.*)",
-      "destination": "/index.html"
+      "src": "projects/trust-car-frontend/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
     }
   ]
 }
