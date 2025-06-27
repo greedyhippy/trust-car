@@ -30,7 +30,7 @@ export class VehicleContractService {
     const txnB64 = algosdk.encodeUnsignedTransaction(txn);
     const signedTxns = await signTransaction([txnB64]);
 
-    const txId = await this.client.sendTransaction(signedTxns[0]);
+    const txId = await this.client.sendTransaction(signedTxns[0] as Uint8Array);
     const result = await this.client.waitForConfirmation(txId, TRANSACTION_WAIT_ROUNDS);
 
     return {
