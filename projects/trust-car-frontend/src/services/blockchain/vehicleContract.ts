@@ -35,7 +35,7 @@ export class VehicleContractService {
 
     return {
       txId,
-      confirmedRound: result.confirmedRound || result['confirmed-round'],
+      confirmedRound: Number(result.confirmedRound || 0),
     };
   }
 

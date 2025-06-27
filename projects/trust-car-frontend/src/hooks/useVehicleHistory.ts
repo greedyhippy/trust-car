@@ -289,8 +289,8 @@ export const useVehicleHistory = () => {
       for (const txn of searchResponse.transactions) {
         VehicleLogger.info('Processing transaction:', {
           id: txn.id,
-          type: txn['tx-type'],
-          appId: txn['application-transaction']?.['application-id']
+          type: txn.txType,
+          appId: txn.applicationTransaction?.applicationId
         });
 
         const event = parseTransactionToEvent(txn, registration);

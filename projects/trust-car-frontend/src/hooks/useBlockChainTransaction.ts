@@ -201,8 +201,7 @@ export const useBlockchainTransaction = () => {
       const result = await algorand.send.appCall({
         appId: APP_ID,
         sender: activeAddress || 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
-        method: 'getInfo()string',
-        methodArgs: []
+        args: []
       });
 
       return result.return?.returnValue?.toString() || null;

@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { TransactionMonitor, TransactionInfo } from '../utils/transactionMonitor';
 import { LoadingSpinner } from './common/LoadingSpinner';
 import { ErrorMessage } from './common/ErrorMessage';
+import { useVehicleHistory } from '../hooks/useVehicleHistory';
 
 interface VehicleHistoryProps {
   registration: string;
@@ -15,9 +16,14 @@ interface VehicleHistoryEvent {
   type: 'register' | 'transfer' | 'service' | 'unknown';
   timestamp: Date;
   txId: string;
+  round?: number;
   details: {
     registration?: string;
     method?: string;
+    fromOwner?: string;
+    toOwner?: string;
+    serviceType?: string;
+    [key: string]: any; // Allow additional properties
   };
 }
 
@@ -182,12 +188,14 @@ const EventDetails: React.FC<{ event: VehicleHistoryEvent }> = ({ event }) => {
                     transition: 'all 0.2s ease'
                   }}
                   onMouseEnter={(e) => {
-                    e.target.style.backgroundColor = 'rgba(33, 150, 243, 0.1)';
-                    e.target.style.textDecoration = 'underline';
+                    const target = e.target as HTMLElement;
+                    target.style.backgroundColor = 'rgba(33, 150, 243, 0.1)';
+                    target.style.textDecoration = 'underline';
                   }}
                   onMouseLeave={(e) => {
-                    e.target.style.backgroundColor = 'transparent';
-                    e.target.style.textDecoration = 'none';
+                    const target = e.target as HTMLElement;
+                    target.style.backgroundColor = 'transparent';
+                    target.style.textDecoration = 'none';
                   }}
                 >
                   <span>🔍</span>
@@ -341,14 +349,16 @@ export const VehicleHistory: React.FC<VehicleHistoryProps> = ({
           }}
           onMouseEnter={(e) => {
             if (!loading) {
-              e.target.style.transform = 'translateY(-1px)';
-              e.target.style.boxShadow = '0 4px 12px rgba(33, 150, 243, 0.3)';
+              const target = e.target as HTMLElement;
+              target.style.transform = 'translateY(-1px)';
+              target.style.boxShadow = '0 4px 12px rgba(33, 150, 243, 0.3)';
             }
           }}
           onMouseLeave={(e) => {
             if (!loading) {
-              e.target.style.transform = 'translateY(0)';
-              e.target.style.boxShadow = 'none';
+              const target = e.target as HTMLElement;
+              target.style.transform = 'translateY(0)';
+              target.style.boxShadow = 'none';
             }
           }}
         >
@@ -390,7 +400,7 @@ export const VehicleHistory: React.FC<VehicleHistoryProps> = ({
           <HistoryStats events={events} />
 
           {/* Show network notice */}
-          {events.some(e => e.txId.startsWith('MOCK')) ? (
+          {events.some((e: VehicleHistoryEvent) => e.txId.startsWith('MOCK')) ? (
             <div style={{
               background: 'rgba(255, 243, 205, 0.9)',
               backdropFilter: 'blur(10px)',
@@ -437,7 +447,7 @@ export const VehicleHistory: React.FC<VehicleHistoryProps> = ({
             overflowY: 'auto',
             padding: '4px'
           }}>
-            {events.map((event) => (
+            {events.map((event: VehicleHistoryEvent) => (
               <EventDetails key={event.id} event={event} />
             ))}
           </div>
