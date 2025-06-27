@@ -39,8 +39,6 @@
     "generate:app-clients": "algokit project link --all",
     "dev": "npm run generate:app-clients && vite",
     "build": "npm run generate:app-clients && tsc && vite build",
-    "build:vercel": "tsc && vite build",
-    "vercel-build": "npm run build:vercel",
     "preview": "vite preview"
   },
   "eslintConfig": {
