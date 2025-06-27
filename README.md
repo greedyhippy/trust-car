@@ -10,7 +10,7 @@ This is a project for Chevron College Blockchain course to demo a business proje
 - Milosz Brozek
 - Valentyna Koriahina
 
-Thanks to Pierangelo and all of our class. And Sarah Jane at Algorand.
+Thanks to Pierangelo and all of our class. And Sara Jane at Algorand.
 
 And Claude AI. VScode. VScode Agents. ChatGpt and Vercel.
 
