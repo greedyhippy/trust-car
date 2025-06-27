@@ -16,7 +16,7 @@ There are now TWO `vercel.json` files:
 #### Option A: Fix Root Directory in Vercel Dashboard (EASIEST)
 1. Go to your Vercel project dashboard
 2. Click **Settings** tab
-3. Go to **General** section  
+3. Go to **General** section
 4. Find **Root Directory** setting
 5. Change from `.` to: `projects/trust-car-frontend`
 6. Click **Save**
