@@ -1,5 +1,23 @@
 # trust-car
 
+## Acknowledgments
+
+This is a project for Chevron College Blockchain course to demo a business project concept.
+
+**Created by Team 2:**
+- Keith Brosnan
+- Tran Mai Thuong Ho
+- Milosz Brozek
+- Valentyna Koriahina
+
+Thanks to Pierangelo and all of our class. And Sarah Jane at Algorand.
+
+And Claude AI. VScode. VScode Agents. ChatGpt and Vercel.
+
+But especially you Claude! 🎉
+
+---
+
 This starter full stack project has been generated using AlgoKit. See below for default getting started instructions.
 
 ## Setup
