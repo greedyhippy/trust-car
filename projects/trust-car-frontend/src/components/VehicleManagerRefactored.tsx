@@ -223,6 +223,18 @@ export const VehicleManager: React.FC = () => {
           --gradient-dark: linear-gradient(135deg, #0d0d0d 0%, #1a1a1a 50%, #2d2d2d 100%);
           --gradient-luxury: linear-gradient(135deg, #1a1a1a 0%, #d4af37 100%);
           --gradient-chrome: linear-gradient(135deg, #e5e7eb 0%, #9ca3af 50%, #6b7280 100%);
+
+          /* Production optimization: CSS custom properties for common values */
+          --border-radius-sm: 8px;
+          --border-radius-md: 12px;
+          --border-radius-lg: 16px;
+          --border-radius-xl: 20px;
+          --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
+          --shadow-md: 0 4px 15px rgba(0, 0, 0, 0.15);
+          --shadow-lg: 0 8px 25px rgba(0, 0, 0, 0.2);
+          --transition-fast: 0.2s ease;
+          --transition-normal: 0.3s ease;
+          --transition-slow: 0.4s ease;
         }
 
         * {
@@ -1107,49 +1119,71 @@ export const VehicleManager: React.FC = () => {
           <div className="banner-section fade-in">
             <img
               src={bannerImage}
-              alt="TrustCar Banner"
+              alt="TrustCar Banner - Blockchain-powered vehicle management"
               className="banner-image"
+              loading="eager"
+              onError={(e) => {
+                // Fallback for banner image load failure
+                console.warn('Banner image failed to load:', bannerImage);
+                e.currentTarget.style.display = 'none';
+              }}
             />
             <div className="banner-overlay">
               <div className="banner-content">
                 <div style={{ marginBottom: '15px' }}>
                   <img
                     src={trustCarLogo}
-                    alt="TrustCar Logo"
+                    alt="TrustCar Logo - Click for help and tutorial"
                     style={{
                       height: '80px',
                       maxWidth: '400px',
-                      filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))',
+                      filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3)) brightness(0.77)',
                       cursor: 'pointer',
-                      transition: 'all 0.3s ease'
+                      transition: 'all 0.3s ease',
+                      borderRadius: '30px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                      padding: '8px'
                     }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.transform = 'scale(1.05)';
-                      e.currentTarget.style.filter = 'drop-shadow(0 4px 8px rgba(0,0,0,0.4))';
+                      e.currentTarget.style.filter = 'drop-shadow(0 4px 8px rgba(0,0,0,0.4)) brightness(0.85)';
+                      e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.15)';
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.transform = 'scale(1)';
-                      e.currentTarget.style.filter = 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))';
+                      e.currentTarget.style.filter = 'drop-shadow(0 2px 4px rgba(0,0,0,0.3)) brightness(0.77)';
+                      e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
                     }}
                     onClick={() => {
                       setShowTutorial(true);
                       setCurrentTutorialStep(0);
                     }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        setShowTutorial(true);
+                        setCurrentTutorialStep(0);
+                      }
+                    }}
+                    tabIndex={0}
+                    role="button"
+                    aria-label="Open tutorial and help guide"
                     title="Click for help and tutorial"
                   />
                 </div>
                 <p style={{
-                  color: 'rgba(255,255,255,0.9)',
+                  color: 'rgba(255,255,255,0.95)',
                   fontSize: '1.2rem',
-                  textShadow: '0 1px 2px rgba(0,0,0,0.3)',
-                  marginBottom: '10px'
+                  textShadow: '0 2px 4px rgba(0,0,0,0.7), 0 1px 2px rgba(0,0,0,0.5)',
+                  marginBottom: '10px',
+                  fontWeight: '600'
                 }}>
                   Blockchain-Powered Vehicle Management System
                 </p>
                 <p style={{
-                  color: 'rgba(255,255,255,0.7)',
+                  color: 'rgba(255,255,255,0.85)',
                   fontSize: '0.9rem',
-                  textShadow: '0 1px 2px rgba(0,0,0,0.3)',
+                  textShadow: '0 2px 4px rgba(0,0,0,0.7), 0 1px 2px rgba(0,0,0,0.5)',
                   fontStyle: 'italic'
                 }}>
                   Built on Algorand TestNet • Immutable • Transparent • Secure
@@ -1187,21 +1221,31 @@ export const VehicleManager: React.FC = () => {
               >
                 ×
               </button>
-              <div style={{ textAlign: 'center' }}>
+              <div style={{
+                textAlign: 'center',
+                backgroundColor: 'rgba(255, 255, 255, 0.4)',
+                padding: '20px',
+                borderRadius: '12px',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
+                boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)'
+              }}>
                 <div style={{ fontSize: '2rem', marginBottom: '10px' }}>👋</div>
                 <h3 style={{
-                  color: '#2e7d32',
+                  color: '#1a5d1a',
                   marginBottom: '10px',
-                  fontSize: '1.2rem'
+                  fontSize: '1.2rem',
+                  fontWeight: '700'
                 }}>
                   Welcome to TrustCar Demo!
                 </h3>
                 <p style={{
-                  color: '#555',
+                  color: '#2c2c2c',
                   marginBottom: '15px',
-                  lineHeight: '1.5'
+                  lineHeight: '1.5',
+                  fontWeight: '500'
                 }}>
-                  New here? Click the <strong>❓ Help</strong> button or the logo above for a guided tour.
+                  New here? Click the <strong style={{ color: '#1a5d1a' }}>❓ Help</strong> button or the logo above for a guided tour.
                   Already know what you're doing? Connect your TestNet wallet and start exploring!
                 </p>
                 <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -1373,8 +1417,17 @@ export const VehicleManager: React.FC = () => {
                   type="text"
                   placeholder="21G99999"
                   value={registration}
-                  onChange={(e) => setRegistration(e.target.value.toUpperCase())}
-                  onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                  onChange={(e) => {
+                    // Production: Input sanitization and validation
+                    const sanitized = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+                    setRegistration(sanitized);
+                  }}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleSearch();
+                    }
+                  }}
                   style={{
                     flex: 1,
                     border: 'none',
@@ -1390,6 +1443,8 @@ export const VehicleManager: React.FC = () => {
                     height: '100%'
                   }}
                   maxLength={8}
+                  aria-label="Enter Irish vehicle registration number"
+                  aria-describedby="plate-helper-text"
                 />
               </div>
 
@@ -1409,13 +1464,18 @@ export const VehicleManager: React.FC = () => {
             </div>
 
             {/* Plate Helper Text */}
-            <div style={{
-              textAlign: 'center',
-              marginBottom: '15px',
-              fontSize: '12px',
-              color: '#666',
-              fontStyle: 'italic'
-            }}>
+            <div
+              id="plate-helper-text"
+              style={{
+                textAlign: 'center',
+                marginBottom: '15px',
+                fontSize: '12px',
+                color: '#666',
+                fontStyle: 'italic'
+              }}
+              role="note"
+              aria-live="polite"
+            >
               📋 Enter Irish registration number (e.g., 21G99999, 12D12345)
             </div>
 
@@ -1589,7 +1649,9 @@ export const VehicleManager: React.FC = () => {
                       }}>
                         <img
                           src={vehicleData.imageUrl}
-                          alt={`${vehicleData.make} ${vehicleData.model} (${vehicleData.year})`}
+                          alt={`${vehicleData.make} ${vehicleData.model} (${vehicleData.year}) - Vehicle image`}
+                          loading="lazy"
+                          decoding="async"
                           style={{
                             width: '100%',
                             maxWidth: '400px',
@@ -1608,15 +1670,30 @@ export const VehicleManager: React.FC = () => {
                             e.currentTarget.style.boxShadow = 'none';
                           }}
                           onError={(e) => {
-                            // Show fallback if image fails to load
+                            // Production: Better fallback handling
+                            console.warn('Vehicle image failed to load:', vehicleData.imageUrl);
                             const target = e.currentTarget;
                             target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjI1MCIgdmlld0JveD0iMCAwIDQwMCAyNTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMjUwIiBmaWxsPSIjRjVGNUY1Ii8+CjxwYXRoIGQ9Ik0yMDAgMTI1SDE2MFYxNjVIMjAwVjEyNVoiIGZpbGw9IiNEREREREQiLz4KPHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIwIDMwSDEwVjEwSDMwVjMwSDIwWiIgZmlsbD0iI0RERERERCIvPgo8L3N2Zz4K';
-                            target.alt = 'Vehicle image not available';
+                            target.alt = `${vehicleData.make} ${vehicleData.model} - Image not available`;
+                            target.style.cursor = 'default';
                           }}
                           onClick={() => {
-                            // Open full size image in new tab
-                            window.open(vehicleData.imageUrl, '_blank');
+                            // Production: Safe window.open with security considerations
+                            if (vehicleData.imageUrl && !vehicleData.imageUrl.includes('data:image/svg+xml')) {
+                              window.open(vehicleData.imageUrl, '_blank', 'noopener,noreferrer');
+                            }
                           }}
+                          onKeyDown={(e) => {
+                            if ((e.key === 'Enter' || e.key === ' ') && vehicleData.imageUrl) {
+                              e.preventDefault();
+                              if (!vehicleData.imageUrl.includes('data:image/svg+xml')) {
+                                window.open(vehicleData.imageUrl, '_blank', 'noopener,noreferrer');
+                              }
+                            }
+                          }}
+                          tabIndex={0}
+                          role="button"
+                          aria-label={`View full size image of ${vehicleData.make} ${vehicleData.model}`}
                         />
                         <div style={{
                           marginTop: '10px',
