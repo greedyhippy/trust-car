@@ -796,6 +796,19 @@ export const VehicleManager: React.FC = () => {
             font-size: 18px;
             height: 60px;
           }
+          /* Mobile wallet banner improvements */
+          .wallet-status-banner {
+            margin: 15px 10px !important;
+            padding: 15px !important;
+            flex-direction: column;
+            text-align: center;
+            gap: 12px;
+          }
+          .wallet-status-banner button {
+            width: 100%;
+            max-width: 200px;
+            margin: 0 auto;
+          }
         }
 
         @media (max-width: 480px) {
@@ -807,6 +820,16 @@ export const VehicleManager: React.FC = () => {
             min-width: 240px;
             font-size: 16px;
             height: 55px;
+          }
+          /* Extra small mobile improvements */
+          .wallet-status-banner {
+            margin: 10px 5px !important;
+            padding: 12px !important;
+            font-size: 14px;
+          }
+          .wallet-status-banner .wallet-address {
+            font-size: 12px;
+            word-break: break-all;
           }
         }
         .glass-card {
@@ -1096,6 +1119,24 @@ export const VehicleManager: React.FC = () => {
             font-size: 1.1rem;
             padding: 0 15px;
           }
+          /* Search section mobile improvements */
+          .glass-card {
+            margin: 15px 10px !important;
+            padding: 25px 15px !important;
+          }
+          .search-input-group {
+            flex-direction: column;
+            gap: 15px;
+          }
+          .search-input-group input {
+            width: 100% !important;
+            min-width: unset !important;
+          }
+          .search-input-group button {
+            width: 100% !important;
+            max-width: 200px !important;
+            margin: 0 auto !important;
+          }
         }
         @media (max-width: 480px) {
           .banner-section {
@@ -1109,6 +1150,18 @@ export const VehicleManager: React.FC = () => {
           .banner-subtitle {
             font-size: 1rem;
             padding: 0 10px;
+          }
+          /* Extra small search improvements */
+          .glass-card {
+            margin: 10px 5px !important;
+            padding: 20px 12px !important;
+          }
+          .search-section-title {
+            font-size: 1.5rem !important;
+          }
+          .dropdown-select {
+            font-size: 14px !important;
+            padding: 8px 12px !important;
           }
         }
       `}</style>
@@ -1328,7 +1381,7 @@ export const VehicleManager: React.FC = () => {
               </button>
             </div>
           ) : (
-            <div className="glass-card slide-in" style={{
+            <div className="glass-card wallet-status-banner slide-in" style={{
               textAlign: 'center',
               marginBottom: '30px',
               padding: '15px',
@@ -1340,7 +1393,7 @@ export const VehicleManager: React.FC = () => {
             }}>
               <div style={{ display: 'flex', alignItems: 'center' }}>
                 <span style={{ fontSize: '1.5rem', marginRight: '10px' }}>✅</span>
-                <span style={{ fontWeight: '600', color: '#2e7d32' }}>
+                <span className="wallet-address" style={{ fontWeight: '600', color: '#2e7d32' }}>
                   Wallet Connected: {walletAddress?.slice(0, 8)}...{walletAddress?.slice(-6)}
                 </span>
               </div>
@@ -1379,7 +1432,7 @@ export const VehicleManager: React.FC = () => {
             borderRadius: '20px',
             marginBottom: '30px'
           }}>
-            <h2 style={{
+            <h2 className="search-section-title" style={{
               fontSize: '1.8rem',
               marginBottom: '20px',
               color: '#333',
@@ -1390,7 +1443,7 @@ export const VehicleManager: React.FC = () => {
               🔍 Search Vehicle
             </h2>
 
-            <div style={{ display: 'flex', gap: '15px', marginBottom: '20px', alignItems: 'center', justifyContent: 'center' }}>
+            <div className="search-input-group" style={{ display: 'flex', gap: '15px', marginBottom: '20px', alignItems: 'center', justifyContent: 'center' }}>
               {/* European Style Irish License Plate Styled Search Bar */}
               <div className="license-plate-input">
                 {/* EU Stars Strip */}
@@ -1490,6 +1543,7 @@ export const VehicleManager: React.FC = () => {
                 Select from available vehicles ({AVAILABLE_VEHICLES.length} total):
               </strong>
               <select
+                className="dropdown-select"
                 value=""
                 onChange={(e) => {
                   if (e.target.value) {
