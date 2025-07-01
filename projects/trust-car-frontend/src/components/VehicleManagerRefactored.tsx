@@ -845,7 +845,7 @@ export const VehicleManager: React.FC = () => {
           box-shadow: 0 16px 50px rgba(0, 0, 0, 0.2);
         }
         .gradient-bg {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #667eea 100%);
+          background: #F8F8FF;
           min-height: 100vh;
           position: relative;
         }
