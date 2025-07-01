@@ -871,7 +871,7 @@ export const VehicleManager: React.FC = () => {
           left: 0;
           right: 0;
           bottom: 0;
-          background: linear-gradient(135deg, rgba(102, 126, 234, 0.3) 0%, rgba(118, 75, 162, 0.4) 50%, rgba(102, 126, 234, 0.3) 100%);
+          background: linear-gradient(135deg, rgba(34, 139, 34, 0.168) 0%, rgba(50, 205, 50, 0.14) 50%, rgba(34, 139, 34, 0.168) 100%);
           display: flex;
           align-items: center;
           justify-content: center;
